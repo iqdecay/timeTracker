@@ -6,7 +6,7 @@ I will use [andlabs/ui](https://github.com/andlabs/ui) to have
 a nice GUI that is compatible with all platforms, and not terminal
 based.
 
-## Specifications :
+## Specifications :
 - Add a project
 - Select a project among a list of added projects
 - Start/stop tracking the time on the click of a button

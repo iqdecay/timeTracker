@@ -1,10 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/andlabs/ui"
+	"io/ioutil"
+	"log"
+	"os"
 	"time"
 )
+
+const filename = "projects.json"
 
 type History []Session
 
@@ -22,6 +28,34 @@ type Project struct {
 	History     History
 	Commits     int
 	Id          int
+}
+
+type ProjectList []Project
+
+func (p *ProjectList) save() error {
+	data, err := json.MarshalIndent(p, "", "	")
+	if err != nil {
+		log.Fatalf("error during json marshaling : %s", err)
+	}
+	return ioutil.WriteFile(filename, []byte(data), 0600)
+}
+
+func loadProjects() ProjectList {
+	var projects ProjectList
+	// if the file doesn't exist, the project list is empty
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return projects
+	} else {
+		// process data
+		data, err := ioutil.ReadFile(filename)
+		if err != nil {
+			log.Fatalf("error reading projects list : #{err}")
+		}
+		if err := json.Unmarshal(data, &projects); err != nil {
+			log.Fatalf("error during json unmarshaling: %s", err)
+		}
+		return projects
+	}
 }
 
 func main() {

@@ -24,6 +24,7 @@ type Session struct {
 type Project struct {
 	Name        string
 	Description string
+	Created     time.Time
 	Duration    time.Duration
 	History     History
 	Commits     int
@@ -91,7 +92,7 @@ func initCreateGUI() {
 		title := titleEntry.Text()
 		//description := descriptionEntry.Text()
 		description := "a"
-		project := Project{title, description, duration, history, 0, maxId}
+		project := Project{title, description, time.Now(), duration, history, 0, maxId}
 		projects.List = append(projects.List, project)
 		projects.maxId = maxId
 		projects.save()

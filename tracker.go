@@ -30,7 +30,10 @@ type Project struct {
 	Id          int
 }
 
-type ProjectList []Project
+type ProjectList struct {
+	List  []Project
+	maxId int
+}
 
 func (p *ProjectList) save() error {
 	data, err := json.MarshalIndent(p, "", "	")
@@ -64,20 +67,58 @@ func (p *Project) Add(s Session) {
 	p.History = append(p.History, s)
 }
 
+func initCreateGUI() {
+	box := ui.NewVerticalBox()
+	titleInput := ui.NewHorizontalBox()
+	titleInput.Append(ui.NewLabel("Enter the project title :"), false)
+	titleEntry := ui.NewEntry()
+	titleInput.Append(titleEntry, false)
+	box.Append(titleInput, true)
+	box.Append(ui.NewHorizontalSeparator(), false)
+	descriptionInput := ui.NewHorizontalBox()
+	descriptionInput.Append(ui.NewLabel("Enter the description of the project :"), false)
+	descriptionEntry := ui.NewMultilineEntry()
+	descriptionInput.Append(descriptionEntry, true)
+	box.Append(descriptionInput, true)
+	projects := loadProjects()
+	maxId := projects.maxId + 1
+	button := ui.NewButton("Save this project")
+	button.OnClicked(func(b *ui.Button) {
+		var history History
+		var duration time.Duration
+		title := titleEntry.Text()
+		description := descriptionEntry.Text()
+		project := Project{title, description, duration, history, 0, maxId}
+		projects.List = append(projects.List, project)
+		projects.maxId = maxId
+		projects.save()
+	})
+	box.Append(button, true)
+	window := ui.NewWindow("Create a project", 1200, 600, true)
+	window.SetChild(box)
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
+	window.Show()
+
+}
+
 func main() {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
 	sessions := make(chan Session)
-	// Send and receive projects ids
+	//Send and receive projects ids
 	selectedProject := make(chan int)
 	go func() {
 		project := <-selectedProject
 		fmt.Println(project)
 	}()
+
 	go func() {
 		for {
-			session := <- sessions
+			session := <-sessions
 			fmt.Println(session)
 		}
 	}()
@@ -91,6 +132,8 @@ func main() {
 			sessions <- session
 		}
 	}()
+	ui.Main(initCreateGUI)
+	//Play/Pause button
 	err := ui.Main(func() {
 		box := ui.NewVerticalBox()
 		button := ui.NewButton("Play")

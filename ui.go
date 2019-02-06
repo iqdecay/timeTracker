@@ -37,6 +37,13 @@ func main() {
 	}()
 	go func() {
 		for {
+			duration := <-durations
+			fmt.Println(duration)
+		}
+	}()
+
+	go func() {
+		for {
 			beginTime := <-beginTimes
 			endTime := <-endTimes
 			duration := endTime.Sub(beginTime)
@@ -54,28 +61,6 @@ func main() {
 			if b.Text() == "Play" {
 				b.SetText("Pause")
 				beginTimes <- time.Now()
-				window.Destroy()
-				window = ui.NewWindow("window2", 400, 200, true)
-				newBox := ui.NewVerticalBox()
-				newLabel := ui.NewLabel("welcome to new window")
-				radioButtons := ui.NewRadioButtons()
-				radioButtons.Append("choice 1")
-				radioButtons.Append("choice 2")
-				radioButtons.SetSelected(1)
-				radioButtons.OnSelected(func(r *ui.RadioButtons) {
-					fmt.Println("Pressed button : ", r.Selected())
-				})
-				separator := ui.NewHorizontalSeparator()
-				newBox.Append(newLabel, true)
-				newBox.Append(separator, true)
-				newBox.Append(radioButtons, true)
-				window.SetChild(newBox)
-				window.OnClosing(func(*ui.Window) bool {
-					ui.Quit()
-					return true
-				})
-				window.Show()
-
 			} else {
 				b.SetText("Play")
 				endTimes <- time.Now()

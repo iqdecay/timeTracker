@@ -58,11 +58,17 @@ func loadProjects() ProjectList {
 	}
 }
 
+func (p *Project) Add(s Session) {
+	p.Duration += s.Duration
+	p.Commits += s.Commits
+	p.History = append(p.History, s)
+}
+
 func main() {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
-	durations := make(chan time.Duration)
+	sessions := make(chan Session)
 	// Send and receive projects ids
 	selectedProject := make(chan int)
 	go func() {
@@ -71,8 +77,8 @@ func main() {
 	}()
 	go func() {
 		for {
-			duration := <-durations
-			fmt.Println(duration)
+			session := <- sessions
+			fmt.Println(session)
 		}
 	}()
 
@@ -81,7 +87,8 @@ func main() {
 			beginTime := <-beginTimes
 			endTime := <-endTimes
 			duration := endTime.Sub(beginTime)
-			durations <- duration
+			session := Session{beginTime, endTime, duration, 0}
+			sessions <- session
 		}
 	}()
 	err := ui.Main(func() {

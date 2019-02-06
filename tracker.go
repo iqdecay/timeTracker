@@ -68,37 +68,35 @@ func (p *Project) Add(s Session) {
 }
 
 func initCreateGUI() {
-	box := ui.NewVerticalBox()
-	titleInput := ui.NewHorizontalBox()
-	titleInput.Append(ui.NewLabel("Enter the project title :"), false)
+	form := ui.NewForm()
+	form.SetPadded(true)
 	titleEntry := ui.NewEntry()
-	titleInput.Append(titleEntry, false)
-	box.Append(titleInput, true)
-	box.Append(ui.NewHorizontalSeparator(), false)
-	descriptionInput := ui.NewHorizontalBox()
-	descriptionInput.Append(ui.NewLabel("Enter the description of the project :"), false)
+	form.Append("Enter project name", titleEntry, false)
 	descriptionEntry := ui.NewMultilineEntry()
-	descriptionInput.Append(descriptionEntry, true)
-	box.Append(descriptionInput, true)
+	form.Append("Enter the description of the project", descriptionEntry, true)
+	button := ui.NewButton("\n\n\n\n Save this project \n\n\n\n")
+	form.Append("", button, false)
+
 	projects := loadProjects()
 	maxId := projects.maxId + 1
-	button := ui.NewButton("Save this project")
+	window := ui.NewWindow("Create a project", 1200, 600, true)
+	window.SetChild(form)
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
 	button.OnClicked(func(b *ui.Button) {
 		var history History
 		var duration time.Duration
 		title := titleEntry.Text()
-		description := descriptionEntry.Text()
+		//description := descriptionEntry.Text()
+		description := "a"
 		project := Project{title, description, duration, history, 0, maxId}
 		projects.List = append(projects.List, project)
 		projects.maxId = maxId
 		projects.save()
-	})
-	box.Append(button, true)
-	window := ui.NewWindow("Create a project", 1200, 600, true)
-	window.SetChild(box)
-	window.OnClosing(func(*ui.Window) bool {
+		window.Destroy()
 		ui.Quit()
-		return true
 	})
 	window.Show()
 

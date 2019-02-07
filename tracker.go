@@ -11,6 +11,7 @@ import (
 )
 
 const filename = "projects.json"
+const timeFormat = "15:04:05"
 
 type History []Session
 
@@ -47,6 +48,7 @@ func (p *ProjectList) save() error {
 
 func loadProjects() ProjectList {
 	var projects ProjectList
+	projects.List = make(map[int]Project)
 	// if the file doesn't exist, the project list is empty
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		return projects
@@ -110,19 +112,21 @@ func initCreateGUI() {
 		projects.save()
 		window.Destroy()
 		ui.Quit()
+		workonProject(maxId)
 	})
 }
 
 func initFirstGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
-	ids := make([]int, len(projects.List))
+	fmt.Println("LEN : ", len(projects.List))
+	var ids []int
 	box := ui.NewVerticalBox()
 	box.SetPadded(true)
 	combobox := ui.NewCombobox()
-	for k, v := range projects.List {
+	for _, v := range projects.List {
 		combobox.Append(v.Name)
-		ids[k] = v.Id
+		ids = append(ids, v.Id)
 	}
 	combobox.SetSelected(0)
 	box.Append(combobox, true)
@@ -142,6 +146,10 @@ func initFirstGUI() {
 	box.Append(ui.NewHorizontalSeparator(), false)
 	selectButton.OnClicked(func(button *ui.Button) {
 		selectedIndex := combobox.Selected()
+		if selectedIndex == -1 {
+			ui.MsgBox(window, "Error", "Please choose a project or create a new one")
+			return
+		}
 		selectedId := ids[selectedIndex]
 		window.Destroy()
 		ui.Quit()
@@ -158,64 +166,67 @@ func initFirstGUI() {
 	box.Append(createButton, false)
 }
 
-func main() {
+func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
 	sessions := make(chan Session)
-	//Send and receive projects ids
-	selectedProject := make(chan int)
-	go func() {
-		project := <-selectedProject
-		fmt.Println(project)
-	}()
-
+	var selectedProject = make(chan int)
+	// Update project with new session
 	go func() {
 		for {
 			session := <-sessions
 			id := session.ProjectId
 			projects := loadProjects()
-			projects.List[id].Add(session)
+			duration := session.Duration.Round(time.Second)
+			fmt.Printf("Project n° %d was updated with a session of %s", id, duration)
+			project := projects.List[id]
+			project.Add(session)
+			projects.List[id] = project
 			projects.save()
 		}
 	}()
 
+	// Get session duration
 	go func() {
 		for {
 			projectId := <-selectedProject
 			beginTime := <-beginTimes
+			fmt.Println(beginTime.Format(timeFormat))
 			endTime := <-endTimes
+			fmt.Println(endTime.Format(timeFormat))
 			duration := endTime.Sub(beginTime)
 			session := Session{beginTime, endTime, duration, 0, projectId}
 			sessions <- session
 		}
 	}()
-	ui.Main(initFirstGUI)
-	//Play/Pause button
-	err := ui.Main(func() {
-		box := ui.NewVerticalBox()
-		button := ui.NewButton("Play")
-		box.Append(button, true)
-		window := ui.NewWindow("Hello", 400, 200, false)
-		window.SetMargined(true)
-		window.SetChild(box)
-		button.OnClicked(func(b *ui.Button) {
-			if b.Text() == "Play" {
-				b.SetText("Pause")
-				beginTimes <- time.Now()
-			} else {
-				b.SetText("Play")
-				endTimes <- time.Now()
-			}
-		})
-		window.OnClosing(func(*ui.Window) bool {
-			ui.Quit()
-			return true
-		})
-		window.Show()
-	})
-	if err != nil {
-		panic(err)
-	}
+	selectedProject <- id
+	box := ui.NewVerticalBox()
+	button := ui.NewButton("Play")
+	box.Append(button, true)
+	window := ui.NewWindow("Hello", 400, 200, false)
+	window.SetMargined(true)
+	window.SetChild(box)
+	button.OnClicked(func(b *ui.Button) {
+		if b.Text() == "Play" {
+			b.SetText("Pause")
+			beginTimes <- time.Now()
+		} else {
+			b.SetText("Play")
+			endTimes <- time.Now()
+			selectedProject <- id
 
+		}
+	})
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
+	window.Show()
+
+
+}
+
+func main() {
+	ui.Main(initFirstGUI)
 }

@@ -6,9 +6,12 @@ I will use [andlabs/ui](https://github.com/andlabs/ui) to have
 a nice GUI that is compatible with all platforms, and not terminal
 based.
 
-## Todos :
-- [ ] GUI for adding project
-- [ ] GUI for selecting project
+## Todos :
+- [x] GUI for adding project
+- [x] GUI for selecting project
+- [ ] GUI when tracking project
+- [ ] Add timer display
+- [ ] Add sound
 - [ ] Change tab when project selected
 - [ ] Track the commits of a directory
 

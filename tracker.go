@@ -15,10 +15,11 @@ const filename = "projects.json"
 type History []Session
 
 type Session struct {
-	Begin    time.Time
-	End      time.Time
-	Duration time.Duration
-	Commits  int
+	Begin     time.Time
+	End       time.Time
+	Duration  time.Duration
+	Commits   int
+	ProjectId int
 }
 
 type Project struct {
@@ -110,7 +111,6 @@ func initCreateGUI() {
 		window.Destroy()
 		ui.Quit()
 	})
-
 }
 
 func initFirstGUI() {
@@ -126,7 +126,6 @@ func initFirstGUI() {
 	}
 	combobox.SetSelected(0)
 	box.Append(combobox, true)
-
 
 	// Setup the window
 	window := ui.NewWindow("Select a project or create a new one", 800, 400, false)
@@ -147,7 +146,6 @@ func initFirstGUI() {
 		window.Destroy()
 		ui.Quit()
 		workonProject(selectedId)
-
 	})
 
 	// Add a create button
@@ -158,7 +156,6 @@ func initFirstGUI() {
 		ui.Main(initCreateGUI)
 	})
 	box.Append(createButton, false)
-
 }
 
 func main() {
@@ -176,16 +173,20 @@ func main() {
 	go func() {
 		for {
 			session := <-sessions
-			fmt.Println(session)
+			id := session.ProjectId
+			projects := loadProjects()
+			projects.List[id].Add(session)
+			projects.save()
 		}
 	}()
 
 	go func() {
 		for {
+			projectId := <-selectedProject
 			beginTime := <-beginTimes
 			endTime := <-endTimes
 			duration := endTime.Sub(beginTime)
-			session := Session{beginTime, endTime, duration, 0}
+			session := Session{beginTime, endTime, duration, 0, projectId}
 			sessions <- session
 		}
 	}()

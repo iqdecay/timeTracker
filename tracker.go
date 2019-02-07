@@ -24,18 +24,18 @@ type Session struct {
 }
 
 type Project struct {
-	Name        string
-	Description string
-	Created     time.Time
-	Duration    time.Duration
-	History     History
-	Commits     int
-	Id          int
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Created     time.Time `json:"created"`
+	Duration    time.Duration `json:"duration"`
+	History     History `json:"history-list"`
+	Commits     int `json:"commits"`
+	Id          int `json:"unique-id"`
 }
 
 type ProjectList struct {
-	List  map[int]Project
-	maxId int
+	MaxId int `json:"max-id"`
+	List  map[int]Project `json:"project-list"`
 }
 
 func (p *ProjectList) save() error {
@@ -71,55 +71,9 @@ func (p *Project) Add(s Session) {
 	p.History = append(p.History, s)
 }
 
-func initCreateGUI() {
-	// Setup the creation form
-	form := ui.NewForm()
-	box := ui.NewHorizontalBox()
-	form.Append("\n", box, false)
-	form.SetPadded(true)
-	titleEntry := ui.NewEntry()
-	form.Append("Enter project name", titleEntry, false)
-	descriptionEntry := ui.NewMultilineEntry()
-	form.Append("Enter the description of the project", descriptionEntry, true)
-	button := ui.NewButton("\n\n\n\n Save this project \n\n\n\n")
-	form.Append("", button, false)
-
-	// Setup the window
-	window := ui.NewWindow("Create a project", 800, 400, true)
-	window.SetChild(form)
-	window.OnClosing(func(*ui.Window) bool {
-		ui.Quit()
-		return true
-	})
-	window.Show()
-
-	// Setup the creation via the confirmation button
-	projects := loadProjects()
-	maxId := projects.maxId + 1
-	button.OnClicked(func(b *ui.Button) {
-		var history History
-		var duration time.Duration
-		title := titleEntry.Text()
-		description := descriptionEntry.Text()
-		// Title must not be empty
-		if title == "" {
-			ui.MsgBox(window, "Error", "Please provide a non-empty title !")
-			return
-		}
-		project := Project{title, description, time.Now(), duration, history, 0, maxId}
-		projects.List[maxId] = project
-		projects.maxId = maxId
-		projects.save()
-		window.Destroy()
-		ui.Quit()
-		workonProject(maxId)
-	})
-}
-
 func initFirstGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
-	fmt.Println("LEN : ", len(projects.List))
 	var ids []int
 	box := ui.NewVerticalBox()
 	box.SetPadded(true)
@@ -152,7 +106,6 @@ func initFirstGUI() {
 		}
 		selectedId := ids[selectedIndex]
 		window.Destroy()
-		ui.Quit()
 		workonProject(selectedId)
 	})
 
@@ -160,10 +113,55 @@ func initFirstGUI() {
 	createButton := ui.NewButton(" \n\n\n Or create a new project \n\n\n")
 	createButton.OnClicked(func(button *ui.Button) {
 		window.Destroy()
-		ui.Quit()
 		ui.Main(initCreateGUI)
 	})
 	box.Append(createButton, false)
+}
+
+func initCreateGUI() {
+	// Setup the creation form
+	form := ui.NewForm()
+	box := ui.NewHorizontalBox()
+	form.Append("\n", box, false)
+	form.SetPadded(true)
+	titleEntry := ui.NewEntry()
+	form.Append("Enter project name", titleEntry, false)
+	descriptionEntry := ui.NewMultilineEntry()
+	form.Append("Enter the description of the project", descriptionEntry, true)
+	button := ui.NewButton("\n\n\n\n Save this project \n\n\n\n")
+	form.Append("", button, false)
+
+	// Setup the window
+	window := ui.NewWindow("Create a project", 800, 400, true)
+	window.SetChild(form)
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
+	window.Show()
+
+	// Setup the creation via the confirmation button
+	projects := loadProjects()
+	id := projects.MaxId + 1
+	button.OnClicked(func(b *ui.Button) {
+		var history History
+		var duration time.Duration
+		title := titleEntry.Text()
+		description := descriptionEntry.Text()
+		// Title must not be empty
+		if title == "" {
+			ui.MsgBox(window, "Error", "Please provide a non-empty title !")
+			return
+		}
+		project := Project{title, description, time.Now(), duration, history, 0, id}
+		projects.List[id] = project
+		projects.MaxId = id
+
+		projects.save()
+		window.Destroy()
+		fmt.Printf("Working on project : %d \n", id)
+		workonProject(id)
+	})
 }
 
 func workonProject(id int) {
@@ -192,9 +190,7 @@ func workonProject(id int) {
 		for {
 			projectId := <-selectedProject
 			beginTime := <-beginTimes
-			fmt.Println(beginTime.Format(timeFormat))
 			endTime := <-endTimes
-			fmt.Println(endTime.Format(timeFormat))
 			duration := endTime.Sub(beginTime)
 			session := Session{beginTime, endTime, duration, 0, projectId}
 			sessions <- session
@@ -218,12 +214,7 @@ func workonProject(id int) {
 
 		}
 	})
-	window.OnClosing(func(*ui.Window) bool {
-		ui.Quit()
-		return true
-	})
 	window.Show()
-
 
 }
 

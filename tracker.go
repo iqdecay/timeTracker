@@ -69,6 +69,7 @@ func (p *Project) Add(s Session) {
 }
 
 func initCreateGUI() {
+	// Setup the creation form
 	form := ui.NewForm()
 	box := ui.NewHorizontalBox()
 	form.Append("\n", box, false)
@@ -80,34 +81,87 @@ func initCreateGUI() {
 	button := ui.NewButton("\n\n\n\n Save this project \n\n\n\n")
 	form.Append("", button, false)
 
-	projects := loadProjects()
-	maxId := projects.maxId + 1
+	// Setup the window
 	window := ui.NewWindow("Create a project", 800, 400, true)
 	window.SetChild(form)
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
 	})
+	window.Show()
+
+	// Setup the creation via the confirmation button
+	projects := loadProjects()
+	maxId := projects.maxId + 1
 	button.OnClicked(func(b *ui.Button) {
-		for {
-			var history History
-			var duration time.Duration
-			title := titleEntry.Text()
-			description := descriptionEntry.Text()
-			if title == "" {
-				ui.MsgBox(window, "Error", "Please provide a non-empty title !")
-				continue
-			}
-			project := Project{title, description, time.Now(), duration, history, 0, maxId}
-			projects.List = append(projects.List, project)
-			projects.maxId = maxId
-			projects.save()
-			window.Destroy()
-			ui.Quit()
-			break
+		var history History
+		var duration time.Duration
+		title := titleEntry.Text()
+		description := descriptionEntry.Text()
+		// Title must not be empty
+		if title == "" {
+			ui.MsgBox(window, "Error", "Please provide a non-empty title !")
+			return
 		}
+		project := Project{title, description, time.Now(), duration, history, 0, maxId}
+		projects.List = append(projects.List, project)
+		projects.maxId = maxId
+		projects.save()
+		window.Destroy()
+		ui.Quit()
+	})
+
+}
+
+func initFirstGUI() {
+	// Setup the project selection combobox
+	projects := loadProjects()
+	ids := make([]int, len(projects.List))
+	box := ui.NewVerticalBox()
+	box.SetPadded(true)
+	combobox := ui.NewCombobox()
+	for k, v := range projects.List {
+		combobox.Append(v.Name)
+		ids[k] = v.Id
+	}
+	combobox.SetSelected(0)
+	box.Append(combobox, true)
+
+
+	// Add a select button
+	selectButton := ui.NewButton("Work on this project")
+	box.Append(selectButton, true)
+	box.Append(ui.NewHorizontalSeparator(), false)
+	selectButton.OnClicked(func(button *ui.Button) {
+		selectedIndex := combobox.Selected()
+
+
+
+	})
+
+	// Setup the window
+	window := ui.NewWindow("Select a project or create a new one", 800,400, false)
+	window.SetChild(box)
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
 	})
 	window.Show()
+
+
+	// Add a create button
+	createButton := ui.NewButton(" \n\n\n Or create a new project \n\n\n")
+	createButton.OnClicked(func(button *ui.Button){
+		window.Destroy()
+		ui.Quit()
+		ui.Main(initCreateGUI)
+	})
+	box.Append(createButton, false)
+
+
+
+
+
 
 }
 
@@ -139,7 +193,7 @@ func main() {
 			sessions <- session
 		}
 	}()
-	ui.Main(initCreateGUI)
+	ui.Main(initFirstGUI)
 	//Play/Pause button
 	err := ui.Main(func() {
 		box := ui.NewVerticalBox()

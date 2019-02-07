@@ -32,7 +32,7 @@ type Project struct {
 }
 
 type ProjectList struct {
-	List  []Project
+	List  map[int]Project
 	maxId int
 }
 
@@ -104,7 +104,7 @@ func initCreateGUI() {
 			return
 		}
 		project := Project{title, description, time.Now(), duration, history, 0, maxId}
-		projects.List = append(projects.List, project)
+		projects.List[maxId] = project
 		projects.maxId = maxId
 		projects.save()
 		window.Destroy()
@@ -128,19 +128,8 @@ func initFirstGUI() {
 	box.Append(combobox, true)
 
 
-	// Add a select button
-	selectButton := ui.NewButton("Work on this project")
-	box.Append(selectButton, true)
-	box.Append(ui.NewHorizontalSeparator(), false)
-	selectButton.OnClicked(func(button *ui.Button) {
-		selectedIndex := combobox.Selected()
-
-
-
-	})
-
 	// Setup the window
-	window := ui.NewWindow("Select a project or create a new one", 800,400, false)
+	window := ui.NewWindow("Select a project or create a new one", 800, 400, false)
 	window.SetChild(box)
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
@@ -148,20 +137,27 @@ func initFirstGUI() {
 	})
 	window.Show()
 
+	// Add a select button
+	selectButton := ui.NewButton("Work on this project")
+	box.Append(selectButton, true)
+	box.Append(ui.NewHorizontalSeparator(), false)
+	selectButton.OnClicked(func(button *ui.Button) {
+		selectedIndex := combobox.Selected()
+		selectedId := ids[selectedIndex]
+		window.Destroy()
+		ui.Quit()
+		workonProject(selectedId)
+
+	})
 
 	// Add a create button
 	createButton := ui.NewButton(" \n\n\n Or create a new project \n\n\n")
-	createButton.OnClicked(func(button *ui.Button){
+	createButton.OnClicked(func(button *ui.Button) {
 		window.Destroy()
 		ui.Quit()
 		ui.Main(initCreateGUI)
 	})
 	box.Append(createButton, false)
-
-
-
-
-
 
 }
 

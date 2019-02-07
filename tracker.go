@@ -24,6 +24,7 @@ type Session struct {
 type Project struct {
 	Name        string
 	Description string
+	Created     time.Time
 	Duration    time.Duration
 	History     History
 	Commits     int
@@ -69,6 +70,8 @@ func (p *Project) Add(s Session) {
 
 func initCreateGUI() {
 	form := ui.NewForm()
+	box := ui.NewHorizontalBox()
+	form.Append("\n", box, false)
 	form.SetPadded(true)
 	titleEntry := ui.NewEntry()
 	form.Append("Enter project name", titleEntry, false)
@@ -79,24 +82,30 @@ func initCreateGUI() {
 
 	projects := loadProjects()
 	maxId := projects.maxId + 1
-	window := ui.NewWindow("Create a project", 1200, 600, true)
+	window := ui.NewWindow("Create a project", 800, 400, true)
 	window.SetChild(form)
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
 	})
 	button.OnClicked(func(b *ui.Button) {
-		var history History
-		var duration time.Duration
-		title := titleEntry.Text()
-		//description := descriptionEntry.Text()
-		description := "a"
-		project := Project{title, description, duration, history, 0, maxId}
-		projects.List = append(projects.List, project)
-		projects.maxId = maxId
-		projects.save()
-		window.Destroy()
-		ui.Quit()
+		for {
+			var history History
+			var duration time.Duration
+			title := titleEntry.Text()
+			description := descriptionEntry.Text()
+			if title == "" {
+				ui.MsgBox(window, "Error", "Please provide a non-empty title !")
+				continue
+			}
+			project := Project{title, description, time.Now(), duration, history, 0, maxId}
+			projects.List = append(projects.List, project)
+			projects.maxId = maxId
+			projects.save()
+			window.Destroy()
+			ui.Quit()
+			break
+		}
 	})
 	window.Show()
 

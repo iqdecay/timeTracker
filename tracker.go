@@ -71,7 +71,7 @@ func (p *Project) Add(s Session) {
 	p.History = append(p.History, s)
 }
 
-func initFirstGUI() {
+func initSelectGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
 	var ids []int
@@ -219,5 +219,5 @@ func workonProject(id int) {
 }
 
 func main() {
-	ui.Main(initFirstGUI)
+	ui.Main(initSelectGUI)
 }

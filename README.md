@@ -10,7 +10,7 @@ based.
 - [x] GUI for adding project
 - [x] GUI for selecting project
 - [ ] GUI when tracking project
-- [ ] Fix GUI exit
+- [x] Fix GUI exit
 - [ ] Add timer display
 - [ ] Add sound
 - [ ] Change tab when project selected

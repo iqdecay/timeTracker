@@ -222,6 +222,20 @@ func workonProject(id int) {
 
 }
 
+type tabHandler struct {
+	content [][]int
+}
+
+func (mh *tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
+	l := len(mh.content)
+	types := make([]ui.TableValue, l)
+	for i := 0; i <l; i ++ {
+		types[i] = ui.TableInt(0)
+	}
+	return types
+}
+
+
 func main() {
 	ui.Main(initSelectGUI)
 }

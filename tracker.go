@@ -177,7 +177,7 @@ func workonProject(id int) {
 			id := session.ProjectId
 			projects := loadProjects()
 			duration := session.Duration.Round(time.Second)
-			fmt.Printf("Project n° %d was updated with a session of %s", id, duration)
+			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			project := projects.List[id]
 			project.Add(session)
 			projects.List[id] = project
@@ -203,6 +203,10 @@ func workonProject(id int) {
 	window := ui.NewWindow("Hello", 400, 200, false)
 	window.SetMargined(true)
 	window.SetChild(box)
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
 	button.OnClicked(func(b *ui.Button) {
 		if b.Text() == "Play" {
 			b.SetText("Pause")

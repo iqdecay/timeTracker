@@ -24,17 +24,17 @@ type Session struct {
 }
 
 type Project struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Created     time.Time `json:"created"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Created     time.Time     `json:"created"`
 	Duration    time.Duration `json:"duration"`
-	History     History `json:"history-list"`
-	Commits     int `json:"commits"`
-	Id          int `json:"unique-id"`
+	History     History       `json:"history-list"`
+	Commits     int           `json:"commits"`
+	Id          int           `json:"unique-id"`
 }
 
 type ProjectList struct {
-	MaxId int `json:"max-id"`
+	MaxId int             `json:"max-id"`
 	List  map[int]Project `json:"project-list"`
 }
 
@@ -226,16 +226,30 @@ type tabHandler struct {
 	content [][]int
 }
 
-func (mh *tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
-	l := len(mh.content)
+func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
+	l := len(t.content[0])
 	types := make([]ui.TableValue, l)
-	for i := 0; i <l; i ++ {
+	for i := 0; i < l; i ++ {
 		types[i] = ui.TableInt(0)
 	}
 	return types
 }
 
+func (t tabHandler) NumRows() int {
+	return len(t.content)
+}
+
+func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
+	return ui.TableValue(ui.TableInt(t.content[row][column]))
+}
+
+func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
+	t.content[row][column] = value
+}
 
 func main() {
-	ui.Main(initSelectGUI)
+	a := [8][4]int{}
+	fmt.Println(a)
+
+	//ui.Main(initSelectGUI)
 }

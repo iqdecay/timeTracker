@@ -223,7 +223,15 @@ func workonProject(id int) {
 }
 
 type tabHandler struct {
-	content [][]int
+	content [8][4]ui.TableValue
+}
+
+func newTabHandler() *tabHandler {
+	m := new(tabHandler)
+	for i, j := 0, 0; i < 8 && j < 4; i, j = i+1, j+1 {
+		m.content[i][j] = ui.TableInt(i) + ui.TableInt(j)
+	}
+	return m
 }
 
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
@@ -235,21 +243,32 @@ func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	return types
 }
 
-func (t tabHandler) NumRows() int {
+func (t tabHandler) NumRows(m *ui.TableModel) int {
 	return len(t.content)
 }
 
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
-	return ui.TableValue(ui.TableInt(t.content[row][column]))
+	return t.content[row][column]
 }
 
 func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
-	t.content[row][column] = value
+	t.content[row][column] = value.(ui.TableInt)
 }
 
 func main() {
-	a := [8][4]int{}
-	fmt.Println(a)
+	handler := newTabHandler()
+	tabModel := ui.NewTableModel(handler)
+	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
+	table := ui.NewTable(&params)
+	box := ui.NewVerticalBox()
+	box.Append(table, true)
+	window := ui.NewWindow("test", 800, 400, false)
+	window.SetChild(box)
+	window.Show()
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
 
 	//ui.Main(initSelectGUI)
 }

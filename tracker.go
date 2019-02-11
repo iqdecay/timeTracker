@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"time"
+    "strconv"
 )
 
 const filename = "projects.json"
@@ -238,7 +239,7 @@ func newTabHandler() *tabHandler {
 	L := len(m.content[0])
 	for i := 0; i < l; i++ {
 		for j := 0; j < L; j++ {
-			m.content[i][j] = "oijofjioj"
+			m.content[i][j] = strconv.Itoa(i+j)
 		}
 	}
 	return m
@@ -300,8 +301,8 @@ func initTable() {
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
 	table := ui.NewTable(&params)
-	table.AppendTextColumn("column 11", 0, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("iojoij", 1, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("", 0, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("", 1, ui.TableModelColumnNeverEditable, nil)
 	box := ui.NewVerticalBox()
 	box.Append(table, true)
 	window := ui.NewWindow("test", 800, 400, false)

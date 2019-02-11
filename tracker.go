@@ -229,13 +229,17 @@ func workonProject(id int) {
 }
 
 type tabHandler struct {
-	content [8][4]ui.TableValue
+	content [3][2]string
 }
 
 func newTabHandler() *tabHandler {
 	m := new(tabHandler)
-	for i, j := 0, 0; i < 8 && j < 4; i, j = i+1, j+1 {
-		m.content[i][j] = ui.TableInt(i) + ui.TableInt(j)
+	l := len(m.content)
+	L := len(m.content[0])
+	for i := 0; i < l; i++ {
+		for j := 0; j < L; j++ {
+			m.content[i][j] = "oijofjioj"
+		}
 	}
 	return m
 }
@@ -243,8 +247,8 @@ func newTabHandler() *tabHandler {
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	l := len(t.content[0])
 	types := make([]ui.TableValue, l)
-	for i := 0; i < l; i ++ {
-		types[i] = ui.TableInt(0)
+	for i := 0; i < l; i++ {
+		types[i] = ui.TableString("")
 	}
 	return types
 }
@@ -254,11 +258,11 @@ func (t tabHandler) NumRows(m *ui.TableModel) int {
 }
 
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
-	return t.content[row][column]
+	return ui.TableString(t.content[row][column])
 }
 
 func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
-	t.content[row][column] = value.(ui.TableInt)
+	t.content[row][column] = string(value.(ui.TableString))
 }
 
 type areaHandler struct{}
@@ -290,11 +294,14 @@ func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
 	// reject all keys
 	return false
 }
-func main() {
+func initTable() {
+
 	handler := newTabHandler()
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
 	table := ui.NewTable(&params)
+	table.AppendTextColumn("column 11", 0, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("iojoij", 1, ui.TableModelColumnNeverEditable, nil)
 	box := ui.NewVerticalBox()
 	box.Append(table, true)
 	window := ui.NewWindow("test", 800, 400, false)
@@ -304,6 +311,9 @@ func main() {
 		ui.Quit()
 		return true
 	})
+}
 
+func main() {
+	ui.Main(initTable)
 	//ui.Main(initSelectGUI)
 }

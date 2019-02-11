@@ -9,6 +9,7 @@ based.
 ## Todos :
 - [x] GUI for adding project
 - [x] GUI for selecting project
+- [ ] Generate tracking project table
 - [ ] GUI when tracking project
 - [x] Fix GUI exit
 - [ ] Add timer display

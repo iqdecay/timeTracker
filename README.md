@@ -11,6 +11,7 @@ based.
 - [x] GUI for selecting project
 - [ ] Generate tracking project table
 - [ ] GUI when tracking project
+- [ ] Add comment at end of session
 - [x] Fix GUI exit
 - [ ] Add timer display
 - [ ] Add sound

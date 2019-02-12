@@ -290,35 +290,6 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 	}
 }
 
-type areaHandler struct{}
-
-func (areaHandler) Draw(a *ui.Area, p *ui.AreaDrawParams) {
-	tl := ui.DrawNewTextLayout(&ui.DrawTextLayoutParams{
-		String:      attrstr,
-		DefaultFont: fontButton.Font(),
-		Width:       p.AreaWidth,
-		Align:       ui.DrawTextAlign(alignment.Selected()),
-	})
-	defer tl.Free()
-	p.Context.Text(tl, 0, 0)
-}
-
-func (areaHandler) MouseEvent(a *ui.Area, me *ui.AreaMouseEvent) {
-	// do nothing
-}
-
-func (areaHandler) MouseCrossed(a *ui.AreaMouseEvent, left bool) {
-	// do nothing
-}
-
-func (areaHandler) DragBroken(a *ui.Area) {
-	// do nothing
-}
-
-func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
-	// reject all keys
-	return false
-}
 func initTable() {
 	projects := loadProjects()
 	project := projects.List[107]

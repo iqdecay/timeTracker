@@ -12,7 +12,8 @@ import (
 )
 
 const filename = "projects.json"
-const timeFormat = "15:04:05"
+const durationFormat = "15:04:05"
+const dateFormat = "Mon 01/02/00 03:04"
 
 var (
 	attrstr    *ui.AttributedString
@@ -230,23 +231,19 @@ func workonProject(id int) {
 }
 
 type tabHandler struct {
-	content [3][2]string
+	history History
+	rows int
 }
 
-func newTabHandler() *tabHandler {
+func newTabHandler(h History) *tabHandler {
 	m := new(tabHandler)
-	l := len(m.content)
-	L := len(m.content[0])
-	for i := 0; i < l; i++ {
-		for j := 0; j < L; j++ {
-			m.content[i][j] = strconv.Itoa(i+j)
-		}
-	}
+	m.history = h
+	m.rows = len(h)
 	return m
 }
 
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
-	l := len(t.content[0])
+	l := 3
 	types := make([]ui.TableValue, l)
 	for i := 0; i < l; i++ {
 		types[i] = ui.TableString("")
@@ -255,18 +252,38 @@ func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 }
 
 func (t tabHandler) NumRows(m *ui.TableModel) int {
-	return len(t.content)
+	return t.rows
 }
 
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
-	return ui.TableString(t.content[row][column])
+	switch column {
+	case 0 :
+		return ui.TableString(t.history[row].Begin.Format(dateFormat))
+	case 1 :
+		return ui.TableString(t.history[row].Duration)
+	case 2 :
+		return ui.TableInt(t.history[row].Commits)
+	}
 }
 
 func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
-	t.content[row][column] = string(value.(ui.TableString))
+	var err error
+	switch column {
+	case 0 :
+		t.history[row].Begin, err = time.Parse(dateFormat, string(value.(ui.TableString)))
+		if err != nil {
+			panic(err)
+		}
+	case 1 :
+		t.history[row].Duration, err = time.ParseDuration(string(value.(ui.TableString)))
+		if err != nil {
+			panic(err)
+		}
+	case 2 :
+		t.history[row].Commits = int(value.(ui.TableInt))
+	}
 }
 
-type areaHandler struct{}
 
 func (areaHandler) Draw(a *ui.Area, p *ui.AreaDrawParams) {
 	tl := ui.DrawNewTextLayout(&ui.DrawTextLayoutParams{
@@ -296,7 +313,6 @@ func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
 	return false
 }
 func initTable() {
-
 	handler := newTabHandler()
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}

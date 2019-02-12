@@ -9,13 +9,13 @@ based.
 ## Todos :
 - [x] GUI for adding project
 - [x] GUI for selecting project
-- [ ] Generate tracking project table
-- [ ] GUI when tracking project
+- [x] Generate tracking project table
+- [x] GUI when tracking project
+- [ ] Update sessions on the fly
 - [ ] Add comment at end of session
 - [x] Fix GUI exit
 - [ ] Add timer display
 - [ ] Add sound
-- [ ] Change tab when project selected
 - [ ] Track the commits of a directory
 
 ## Specifications :

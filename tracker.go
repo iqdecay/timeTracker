@@ -205,9 +205,15 @@ func workonProject(id int) {
 		}
 	}()
 	selectedProject <- id
-	box := ui.NewVerticalBox()
+	projects := loadProjects()
+	project := projects.List[id]
+	box := ui.NewHorizontalBox()
+	// Add play/pause button
 	button := ui.NewButton("Play")
 	box.Append(button, true)
+	// Add history tabular display
+	table := generateTable(project)
+	box.Append(table, true)
 	window := ui.NewWindow("Hello", 400, 200, false)
 	window.SetMargined(true)
 	window.SetChild(box)
@@ -262,12 +268,12 @@ func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	case 1:
 		return ui.TableString(t.history[row].Duration.String())
 	case 2:
-		if t.history[row].Commits == 0{
-		return ui.TableString("None")
-	} else {
-		return ui.TableString(strconv.Itoa(t.history[row].Commits))
+		if t.history[row].Commits == 0 {
+			return ui.TableString("None")
+		} else {
+			return ui.TableString(strconv.Itoa(t.history[row].Commits))
 
-	}
+		}
 	}
 	return ui.TableString("error")
 }
@@ -290,29 +296,17 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 	}
 }
 
-func initTable() {
-	projects := loadProjects()
-	project := projects.List[107]
-	fmt.Println(project)
+func generateTable(project Project) *ui.Table {
 	handler := newTabHandler(project.History)
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
 	table := ui.NewTable(&params)
-	table.AppendTextColumn("", 0, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("", 2, ui.TableModelColumnNeverEditable, nil)
-	box := ui.NewVerticalBox()
-	box.Append(table, true)
-	window := ui.NewWindow("test", 800, 400, false)
-	window.SetChild(box)
-	window.Show()
-	window.OnClosing(func(*ui.Window) bool {
-		ui.Quit()
-		return true
-	})
+	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
+	return table
 }
 
 func main() {
-	ui.Main(initTable)
-	//ui.Main(initSelectGUI)
+	ui.Main(initSelectGUI)
 }

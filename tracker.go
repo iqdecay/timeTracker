@@ -7,13 +7,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
-    "strconv"
 )
 
 const filename = "projects.json"
 const durationFormat = "15:04:05"
-const dateFormat = "Mon 01/02/00 03:04"
+const dateFormat = "Mon 01/02/06 03:04"
 
 var (
 	attrstr    *ui.AttributedString
@@ -232,7 +232,7 @@ func workonProject(id int) {
 
 type tabHandler struct {
 	history History
-	rows int
+	rows    int
 }
 
 func newTabHandler(h History) *tabHandler {
@@ -245,9 +245,9 @@ func newTabHandler(h History) *tabHandler {
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	l := 3
 	types := make([]ui.TableValue, l)
-	for i := 0; i < l; i++ {
-		types[i] = ui.TableString("")
-	}
+	types[0] = ui.TableString("")
+	types[1] = ui.TableString("")
+	types[2] = ui.TableString("")
 	return types
 }
 
@@ -257,33 +257,40 @@ func (t tabHandler) NumRows(m *ui.TableModel) int {
 
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
-	case 0 :
+	case 0:
 		return ui.TableString(t.history[row].Begin.Format(dateFormat))
-	case 1 :
-		return ui.TableString(t.history[row].Duration)
-	case 2 :
-		return ui.TableInt(t.history[row].Commits)
+	case 1:
+		return ui.TableString(t.history[row].Duration.String())
+	case 2:
+		if t.history[row].Commits == 0{
+		return ui.TableString("None")
+	} else {
+		return ui.TableString(strconv.Itoa(t.history[row].Commits))
+
 	}
+	}
+	return ui.TableString("error")
 }
 
 func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
 	var err error
 	switch column {
-	case 0 :
+	case 0:
 		t.history[row].Begin, err = time.Parse(dateFormat, string(value.(ui.TableString)))
 		if err != nil {
 			panic(err)
 		}
-	case 1 :
+	case 1:
 		t.history[row].Duration, err = time.ParseDuration(string(value.(ui.TableString)))
 		if err != nil {
 			panic(err)
 		}
-	case 2 :
+	case 2:
 		t.history[row].Commits = int(value.(ui.TableInt))
 	}
 }
 
+type areaHandler struct{}
 
 func (areaHandler) Draw(a *ui.Area, p *ui.AreaDrawParams) {
 	tl := ui.DrawNewTextLayout(&ui.DrawTextLayoutParams{
@@ -313,12 +320,16 @@ func (areaHandler) KeyEvent(a *ui.Area, ke *ui.AreaKeyEvent) (handled bool) {
 	return false
 }
 func initTable() {
-	handler := newTabHandler()
+	projects := loadProjects()
+	project := projects.List[107]
+	fmt.Println(project)
+	handler := newTabHandler(project.History)
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
 	table := ui.NewTable(&params)
 	table.AppendTextColumn("", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("", 1, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("", 2, ui.TableModelColumnNeverEditable, nil)
 	box := ui.NewVerticalBox()
 	box.Append(table, true)
 	window := ui.NewWindow("test", 800, 400, false)

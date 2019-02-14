@@ -176,27 +176,7 @@ func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
-	//sessions := make(chan Session)
-	var selectedProject = make(chan int)
 
-	// Get session duration and update project with new session
-	go func() {
-		for {
-			projectId := <-selectedProject
-			beginTime := <-beginTimes
-			endTime := <-endTimes
-			duration := endTime.Sub(beginTime)
-			session := Session{beginTime, endTime, duration, 0, projectId}
-			id := session.ProjectId
-			projects := loadProjects()
-			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
-			project := projects.List[id]
-			project.Add(session)
-			projects.List[id] = project
-			projects.save()
-		}
-	}()
-	selectedProject <- id
 	projects := loadProjects()
 	project := projects.List[id]
 	box := ui.NewHorizontalBox()
@@ -204,8 +184,7 @@ func workonProject(id int) {
 	button := ui.NewButton("Start")
 	box.Append(button, true)
 	// Add history tabular display
-	table, handler := generateTable(project)
-	fmt.Println(handler)
+	table, _ := generateTable(project)
 	box.Append(table, true)
 	window := ui.NewWindow("Hello", 800, 400, false)
 	window.SetMargined(true)
@@ -222,10 +201,24 @@ func workonProject(id int) {
 		} else {
 			b.SetText("Start")
 			endTimes <- time.Now()
-			selectedProject <- id
-
 		}
 	})
+
+	// Get session duration and update project with new session
+	go func() {
+		for {
+			beginTime := <-beginTimes
+			endTime := <-endTimes
+			duration := endTime.Sub(beginTime)
+			session := Session{beginTime, endTime, duration, 0, id}
+			projects := loadProjects()
+			project := projects.List[id]
+			project.Add(session)
+			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
+			projects.List[id] = project
+			projects.save()
+		}
+	}()
 	window.Show()
 
 }

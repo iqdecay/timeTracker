@@ -11,7 +11,7 @@ based.
 - [x] GUI for selecting project
 - [x] Generate tracking project table
 - [x] GUI when tracking project
-- [ ] Update sessions on the fly
+- [x] Update session on the fly
 - [ ] Add comment at end of session
 - [x] Fix GUI exit
 - [ ] Add timer display

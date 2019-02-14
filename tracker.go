@@ -195,7 +195,7 @@ func workonProject(id int) {
 	})
 
 	// Add history tabular display
-	table, _ := generateTable(project)
+	table, handler, model := generateTable(project)
 	box.Append(table, true)
 	window := ui.NewWindow("Hello", 800, 400, false)
 	window.SetMargined(true)
@@ -206,7 +206,6 @@ func workonProject(id int) {
 		ui.Quit()
 		return true
 	})
-
 
 	// Get session duration and update project with new session
 	go func() {
@@ -219,11 +218,17 @@ func workonProject(id int) {
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project
 			projects.save()
+			handler.rows += 1
+			previousHistory := handler.history
+			previousHistory = append(previousHistory, Session{})
+			copy(previousHistory[0:], previousHistory[1:])
+			previousHistory[0] = session
+			handler.history = previousHistory
+			model.RowInserted(0)
 		}
 	}()
 
 	window.Show()
-
 
 }
 
@@ -293,7 +298,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 	}
 }
 
-func generateTable(project Project) (*ui.Table, ui.TableModelHandler) {
+func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 	handler := newTabHandler(project.History)
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
@@ -301,7 +306,7 @@ func generateTable(project Project) (*ui.Table, ui.TableModelHandler) {
 	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
-	return table, handler
+	return table, handler, tabModel
 }
 
 func main() {

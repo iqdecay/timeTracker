@@ -183,16 +183,6 @@ func workonProject(id int) {
 	// Add play/pause button
 	button := ui.NewButton("Start")
 	box.Append(button, true)
-	// Add history tabular display
-	table, _ := generateTable(project)
-	box.Append(table, true)
-	window := ui.NewWindow("Hello", 800, 400, false)
-	window.SetMargined(true)
-	window.SetChild(box)
-	window.OnClosing(func(*ui.Window) bool {
-		ui.Quit()
-		return true
-	})
 	// Alternate between start and stop button
 	button.OnClicked(func(b *ui.Button) {
 		if b.Text() == "Start" {
@@ -204,6 +194,20 @@ func workonProject(id int) {
 		}
 	})
 
+	// Add history tabular display
+	table, _ := generateTable(project)
+	box.Append(table, true)
+	window := ui.NewWindow("Hello", 800, 400, false)
+	window.SetMargined(true)
+	window.SetChild(box)
+
+	// Quit the app when the window is closed
+	window.OnClosing(func(*ui.Window) bool {
+		ui.Quit()
+		return true
+	})
+
+
 	// Get session duration and update project with new session
 	go func() {
 		for {
@@ -211,15 +215,15 @@ func workonProject(id int) {
 			endTime := <-endTimes
 			duration := endTime.Sub(beginTime)
 			session := Session{beginTime, endTime, duration, 0, id}
-			projects := loadProjects()
-			project := projects.List[id]
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project
 			projects.save()
 		}
 	}()
+
 	window.Show()
+
 
 }
 

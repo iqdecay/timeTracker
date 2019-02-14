@@ -221,7 +221,7 @@ func workonProject(id int) {
 			handler.rows += 1
 			previousHistory := handler.history
 			previousHistory = append(previousHistory, Session{})
-			copy(previousHistory[0:], previousHistory[1:])
+			copy(previousHistory[1:],previousHistory[0:]  )
 			previousHistory[0] = session
 			handler.history = previousHistory
 			model.RowInserted(0)

@@ -214,7 +214,7 @@ func workonProject(id int) {
 	// Add history tabular display
 	table := generateTable(project)
 	box.Append(table, true)
-	window := ui.NewWindow("Hello", 400, 200, false)
+	window := ui.NewWindow("Hello", 800, 400, false)
 	window.SetMargined(true)
 	window.SetChild(box)
 	window.OnClosing(func(*ui.Window) bool {
@@ -243,6 +243,12 @@ type tabHandler struct {
 
 func newTabHandler(h History) *tabHandler {
 	m := new(tabHandler)
+	// We reverse the slice so recent sessions appear on top
+	var opp int
+	for i := len(h)/2 - 1; i >= 0; i-- {
+		opp = len(h) - 1 - i
+		h[i], h[opp] = h[opp], h[i]
+	}
 	m.history = h
 	m.rows = len(h)
 	return m

@@ -176,24 +176,10 @@ func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
-	sessions := make(chan Session)
+	//sessions := make(chan Session)
 	var selectedProject = make(chan int)
-	// Update project with new session
-	go func() {
-		for {
-			session := <-sessions
-			id := session.ProjectId
-			projects := loadProjects()
-			duration := session.Duration.Round(time.Second)
-			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
-			project := projects.List[id]
-			project.Add(session)
-			projects.List[id] = project
-			projects.save()
-		}
-	}()
 
-	// Get session duration
+	// Get session duration and update project with new session
 	go func() {
 		for {
 			projectId := <-selectedProject
@@ -201,7 +187,13 @@ func workonProject(id int) {
 			endTime := <-endTimes
 			duration := endTime.Sub(beginTime)
 			session := Session{beginTime, endTime, duration, 0, projectId}
-			sessions <- session
+			id := session.ProjectId
+			projects := loadProjects()
+			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
+			project := projects.List[id]
+			project.Add(session)
+			projects.List[id] = project
+			projects.save()
 		}
 	}()
 	selectedProject <- id
@@ -209,10 +201,11 @@ func workonProject(id int) {
 	project := projects.List[id]
 	box := ui.NewHorizontalBox()
 	// Add play/pause button
-	button := ui.NewButton("Play")
+	button := ui.NewButton("Start")
 	box.Append(button, true)
 	// Add history tabular display
-	table := generateTable(project)
+	table, handler := generateTable(project)
+	fmt.Println(handler)
 	box.Append(table, true)
 	window := ui.NewWindow("Hello", 800, 400, false)
 	window.SetMargined(true)
@@ -221,12 +214,13 @@ func workonProject(id int) {
 		ui.Quit()
 		return true
 	})
+	// Alternate between start and stop button
 	button.OnClicked(func(b *ui.Button) {
-		if b.Text() == "Play" {
-			b.SetText("Pause")
+		if b.Text() == "Start" {
+			b.SetText("Stop")
 			beginTimes <- time.Now()
 		} else {
-			b.SetText("Play")
+			b.SetText("Start")
 			endTimes <- time.Now()
 			selectedProject <- id
 
@@ -302,7 +296,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 	}
 }
 
-func generateTable(project Project) *ui.Table {
+func generateTable(project Project) (*ui.Table, ui.TableModelHandler) {
 	handler := newTabHandler(project.History)
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
@@ -310,7 +304,7 @@ func generateTable(project Project) *ui.Table {
 	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
-	return table
+	return table, handler
 }
 
 func main() {

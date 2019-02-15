@@ -76,6 +76,83 @@ func (p *Project) Add(s Session) {
 	p.LastComment = s.Comment
 }
 
+type tabHandler struct {
+	history History
+	rows    int
+}
+
+func newTabHandler(h History) *tabHandler {
+	m := new(tabHandler)
+	// We reverse the slice so recent sessions appear on top
+	var opp int
+	for i := len(h)/2 - 1; i >= 0; i-- {
+		opp = len(h) - 1 - i
+		h[i], h[opp] = h[opp], h[i]
+	}
+	m.history = h
+	m.rows = len(h)
+	return m
+}
+
+func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
+	l := 3
+	types := make([]ui.TableValue, l)
+	types[0] = ui.TableString("")
+	types[1] = ui.TableString("")
+	types[2] = ui.TableString("")
+	return types
+}
+
+func (t tabHandler) NumRows(m *ui.TableModel) int {
+	return t.rows
+}
+
+func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
+	switch column {
+	case 0:
+		return ui.TableString(t.history[row].Begin.Format(dateFormat))
+	case 1:
+		return ui.TableString(t.history[row].Duration.String())
+	case 2:
+		if t.history[row].Commits == 0 {
+			return ui.TableString("None")
+		} else {
+			return ui.TableString(strconv.Itoa(t.history[row].Commits))
+
+		}
+	}
+	return ui.TableString("error")
+}
+
+func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
+	var err error
+	switch column {
+	case 0:
+		t.history[row].Begin, err = time.Parse(dateFormat, string(value.(ui.TableString)))
+		if err != nil {
+			panic(err)
+		}
+	case 1:
+		t.history[row].Duration, err = time.ParseDuration(string(value.(ui.TableString)))
+		if err != nil {
+			panic(err)
+		}
+	case 2:
+		t.history[row].Commits = int(value.(ui.TableInt))
+	}
+}
+
+func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
+	handler := newTabHandler(project.History)
+	tabModel := ui.NewTableModel(handler)
+	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
+	table := ui.NewTable(&params)
+	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
+	return table, handler, tabModel
+}
+
 func initSelectGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
@@ -232,14 +309,9 @@ func workonProject(id int) {
 				ui.Quit()
 				return true
 			})
-			window.Hide()
-			window.Disable()
+			window.Destroy()
 			commentWindow.Show()
 			comment := <-comments
-			commentWindow.Disable()
-			commentWindow.Hide()
-			window.Enable()
-			window.Show()
 
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
@@ -257,88 +329,12 @@ func workonProject(id int) {
 			previousHistory[0] = session
 			handler.history = previousHistory
 			model.RowInserted(0)
+			ui.Quit()
 		}
 	}()
 
 	window.Show()
 
-}
-
-type tabHandler struct {
-	history History
-	rows    int
-}
-
-func newTabHandler(h History) *tabHandler {
-	m := new(tabHandler)
-	// We reverse the slice so recent sessions appear on top
-	var opp int
-	for i := len(h)/2 - 1; i >= 0; i-- {
-		opp = len(h) - 1 - i
-		h[i], h[opp] = h[opp], h[i]
-	}
-	m.history = h
-	m.rows = len(h)
-	return m
-}
-
-func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
-	l := 3
-	types := make([]ui.TableValue, l)
-	types[0] = ui.TableString("")
-	types[1] = ui.TableString("")
-	types[2] = ui.TableString("")
-	return types
-}
-
-func (t tabHandler) NumRows(m *ui.TableModel) int {
-	return t.rows
-}
-
-func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
-	switch column {
-	case 0:
-		return ui.TableString(t.history[row].Begin.Format(dateFormat))
-	case 1:
-		return ui.TableString(t.history[row].Duration.String())
-	case 2:
-		if t.history[row].Commits == 0 {
-			return ui.TableString("None")
-		} else {
-			return ui.TableString(strconv.Itoa(t.history[row].Commits))
-
-		}
-	}
-	return ui.TableString("error")
-}
-
-func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
-	var err error
-	switch column {
-	case 0:
-		t.history[row].Begin, err = time.Parse(dateFormat, string(value.(ui.TableString)))
-		if err != nil {
-			panic(err)
-		}
-	case 1:
-		t.history[row].Duration, err = time.ParseDuration(string(value.(ui.TableString)))
-		if err != nil {
-			panic(err)
-		}
-	case 2:
-		t.history[row].Commits = int(value.(ui.TableInt))
-	}
-}
-
-func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
-	handler := newTabHandler(project.History)
-	tabModel := ui.NewTableModel(handler)
-	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
-	table := ui.NewTable(&params)
-	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
-	return table, handler, tabModel
 }
 
 func main() {

@@ -15,12 +15,6 @@ const filename = "projects.json"
 const durationFormat = "15:04:05"
 const dateFormat = "Mon 01/02/06 03:04"
 
-var (
-	attrstr    *ui.AttributedString
-	fontButton *ui.FontButton
-	alignment  *ui.Combobox
-)
-
 type History []Session
 
 type Session struct {

@@ -29,6 +29,7 @@ type Session struct {
 	Duration  time.Duration
 	Commits   int
 	ProjectId int
+	Comment   string
 }
 
 type Project struct {
@@ -39,6 +40,7 @@ type Project struct {
 	History     History       `json:"history-list"`
 	Commits     int           `json:"commits"`
 	Id          int           `json:"unique-id"`
+	LastComment string
 }
 
 type ProjectList struct {
@@ -77,6 +79,7 @@ func (p *Project) Add(s Session) {
 	p.Duration += s.Duration
 	p.Commits += s.Commits
 	p.History = append(p.History, s)
+	p.LastComment = s.Comment
 }
 
 func initSelectGUI() {
@@ -129,8 +132,7 @@ func initSelectGUI() {
 func initCreateGUI() {
 	// Setup the creation form
 	form := ui.NewForm()
-	box := ui.NewHorizontalBox()
-	form.Append("\n", box, false)
+	form.Append("\n", ui.NewHorizontalBox(), false)
 	form.SetPadded(true)
 	titleEntry := ui.NewEntry()
 	form.Append("Enter project name", titleEntry, false)
@@ -161,10 +163,10 @@ func initCreateGUI() {
 			ui.MsgBox(window, "Error", "Please provide a non-empty title !")
 			return
 		}
-		project := Project{title, description, time.Now(), duration, history, 0, id}
+		project := Project{title, description, time.Now(),
+			duration, history, 0, id, "Project created"}
 		projects.List[id] = project
 		projects.MaxId = id
-
 		projects.save()
 		window.Destroy()
 		fmt.Printf("Working on project : %d \n", id)
@@ -176,13 +178,22 @@ func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
+	comments := make(chan string)
 
 	projects := loadProjects()
 	project := projects.List[id]
+	// Initialize window
+
 	box := ui.NewHorizontalBox()
+	windowTitle := fmt.Sprintf("Project : %s", project.Name)
+	window := ui.NewWindow(windowTitle, 800, 400, false)
+	window.SetMargined(true)
+	window.SetChild(box)
+
 	// Add play/pause button
 	button := ui.NewButton("Start")
 	box.Append(button, true)
+
 	// Alternate between start and stop button
 	button.OnClicked(func(b *ui.Button) {
 		if b.Text() == "Start" {
@@ -191,15 +202,13 @@ func workonProject(id int) {
 		} else {
 			b.SetText("Start")
 			endTimes <- time.Now()
+
 		}
 	})
 
 	// Add history tabular display
 	table, handler, model := generateTable(project)
 	box.Append(table, true)
-	window := ui.NewWindow("Hello", 800, 400, false)
-	window.SetMargined(true)
-	window.SetChild(box)
 
 	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {
@@ -212,16 +221,45 @@ func workonProject(id int) {
 		for {
 			beginTime := <-beginTimes
 			endTime := <-endTimes
+
+			// Generate a form for commenting the session
+			form := ui.NewForm()
+			form.Append("\n", ui.NewHorizontalBox(), false)
+			commentEntry := ui.NewEntry()
+			form.Append("Enter comment for the session ", commentEntry, true)
+			button := ui.NewButton("\n\n Save this session \n\n")
+			form.Append("", button, false)
+			button.OnClicked(func(button *ui.Button) {
+				comments <- commentEntry.Text()
+			})
+			commentWindow := ui.NewWindow("Enter comment about the session", 800, 400, false)
+			commentWindow.SetChild(form)
+			commentWindow.OnClosing(func(*ui.Window) bool {
+				ui.Quit()
+				return true
+			})
+			window.Hide()
+			window.Disable()
+			commentWindow.Show()
+			comment := <-comments
+			commentWindow.Disable()
+			commentWindow.Hide()
+			window.Enable()
+			window.Show()
+
+			// Add the new session to project
 			duration := endTime.Sub(beginTime)
-			session := Session{beginTime, endTime, duration, 0, id}
+			session := Session{beginTime, endTime, duration, 0, id, comment}
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project
 			projects.save()
+
+			// Update the history display with the new session
 			handler.rows += 1
 			previousHistory := handler.history
 			previousHistory = append(previousHistory, Session{})
-			copy(previousHistory[1:],previousHistory[0:]  )
+			copy(previousHistory[1:], previousHistory[0:])
 			previousHistory[0] = session
 			handler.history = previousHistory
 			model.RowInserted(0)

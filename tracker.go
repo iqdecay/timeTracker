@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -21,7 +20,6 @@ type Session struct {
 	Begin     time.Time
 	End       time.Time
 	Duration  time.Duration
-	Commits   int
 	ProjectId int
 	Comment   string
 }
@@ -32,9 +30,8 @@ type Project struct {
 	Created     time.Time     `json:"created"`
 	Duration    time.Duration `json:"duration"`
 	History     History       `json:"history-list"`
-	Commits     int           `json:"commits"`
 	Id          int           `json:"unique-id"`
-	LastComment string
+	LastComment string        `json:last-comment`
 }
 
 type ProjectList struct {
@@ -71,7 +68,6 @@ func loadProjects() ProjectList {
 
 func (p *Project) Add(s Session) {
 	p.Duration += s.Duration
-	p.Commits += s.Commits
 	p.History = append(p.History, s)
 	p.LastComment = s.Comment
 }
@@ -114,10 +110,10 @@ func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	case 1:
 		return ui.TableString(t.history[row].Duration.String())
 	case 2:
-		if t.history[row].Commits == 0 {
+		if t.history[row].Comment == "" {
 			return ui.TableString("None")
 		} else {
-			return ui.TableString(strconv.Itoa(t.history[row].Commits))
+			return ui.TableString(t.history[row].Comment)
 
 		}
 	}
@@ -138,7 +134,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 			panic(err)
 		}
 	case 2:
-		t.history[row].Commits = int(value.(ui.TableInt))
+		t.history[row].Comment = string(value.(ui.TableString)))
 	}
 }
 
@@ -149,7 +145,7 @@ func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 	table := ui.NewTable(&params)
 	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("Commits made", 2, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Comment", 2, ui.TableModelColumnNeverEditable, nil)
 	return table, handler, tabModel
 }
 
@@ -312,7 +308,7 @@ func workonProject(id int) {
 			})
 
 			// Will hold until the button is pressed
-			comment := <- comments
+			comment := <-comments
 
 			// Then go back to tracking
 			ui.QueueMain(func() {
@@ -323,7 +319,7 @@ func workonProject(id int) {
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
 			fmt.Println(comment)
-			session := Session{beginTime, endTime, duration, 0, id, ""}
+			session := Session{beginTime, endTime, duration, id, ""}
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project

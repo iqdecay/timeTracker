@@ -2,9 +2,12 @@
 
 The project is to develop a time tracker so I can track time 
 spent on a development project.
+
 I will use [andlabs/ui](https://github.com/andlabs/ui) to have
 a nice GUI that is compatible with all platforms, and not terminal
 based.
+
+The sound is provided thanks to [faiface/beep](https://github.com/faiface/beep).
 
 ## Todos :
 - [x] GUI for adding project

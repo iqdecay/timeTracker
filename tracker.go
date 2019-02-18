@@ -249,7 +249,7 @@ func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
-	comments := make(chan string)
+	//comments := make(chan string)
 
 	projects := loadProjects()
 	project := projects.List[id]
@@ -286,7 +286,7 @@ func workonProject(id int) {
 		ui.Quit()
 		return true
 	})
-
+	window.Show()
 	// Get session duration and update project with new session
 	go func() {
 		for {
@@ -301,21 +301,30 @@ func workonProject(id int) {
 			button := ui.NewButton("\n\n Save this session \n\n")
 			form.Append("", button, false)
 			button.OnClicked(func(button *ui.Button) {
-				comments <- commentEntry.Text()
+				//comments <- commentEntry.Text()
 			})
-			commentWindow := ui.NewWindow("Enter comment about the session", 800, 400, false)
-			commentWindow.SetChild(form)
-			commentWindow.OnClosing(func(*ui.Window) bool {
-				ui.Quit()
-				return true
+
+			fmt.Println("Hello")
+			//window.Hide()
+			//commentWindow := ui.NewWindow("Enter comment about the session", 800, 400, false)
+			//commentWindow.SetChild(form)
+			//commentWindow.OnClosing(func(*ui.Window) bool {
+			//	ui.Quit()
+			//	return true
+			//})
+			//commentWindow.Show()
+			//fmt.Println("Hello again")
+			//comment := <-comments
+			//fmt.Println(comment)
+			//commentWindow.Hide()
+			//window.Show()
+			ui.QueueMain(func() {
+				window.SetChild(form)
 			})
-			window.Destroy()
-			commentWindow.Show()
-			comment := <-comments
 
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
-			session := Session{beginTime, endTime, duration, 0, id, comment}
+			session := Session{beginTime, endTime, duration, 0, id, ""}
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project
@@ -329,12 +338,8 @@ func workonProject(id int) {
 			previousHistory[0] = session
 			handler.history = previousHistory
 			model.RowInserted(0)
-			ui.Quit()
 		}
 	}()
-
-	window.Show()
-
 }
 
 func main() {

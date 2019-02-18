@@ -300,8 +300,10 @@ func workonProject(id int) {
 			form.Append("Enter comment for the session ", commentEntry, true)
 			button := ui.NewButton("\n\n Save this session \n\n")
 			form.Append("", button, false)
+
+			comments := make(chan string)
 			button.OnClicked(func(button *ui.Button) {
-				//comments <- commentEntry.Text()
+				comments <- commentEntry.Text()
 			})
 
 			fmt.Println("Hello")
@@ -321,9 +323,14 @@ func workonProject(id int) {
 			ui.QueueMain(func() {
 				window.SetChild(form)
 			})
+			comment := <- comments
+			ui.QueueMain(func() {
+				window.SetChild(box)
+			})
 
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
+			fmt.Println(comment)
 			session := Session{beginTime, endTime, duration, 0, id, ""}
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)

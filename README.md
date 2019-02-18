@@ -12,11 +12,10 @@ based.
 - [x] Generate tracking project table
 - [x] GUI when tracking project
 - [x] Update session on the fly
-- [ ] Add comment at end of session
+- [x] Add comment at end of session
 - [x] Fix GUI exit
 - [ ] Add timer display
 - [ ] Add sound
-- [ ] Track the commits of a directory
 
 ## Specifications :
 - Add a project

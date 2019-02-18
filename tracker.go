@@ -249,7 +249,7 @@ func workonProject(id int) {
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
-	//comments := make(chan string)
+	comments := make(chan string)
 
 	projects := loadProjects()
 	project := projects.List[id]
@@ -273,7 +273,6 @@ func workonProject(id int) {
 		} else {
 			b.SetText("Start")
 			endTimes <- time.Now()
-
 		}
 	})
 
@@ -301,30 +300,23 @@ func workonProject(id int) {
 			button := ui.NewButton("\n\n Save this session \n\n")
 			form.Append("", button, false)
 
-			comments := make(chan string)
+			// The buttons submits the comment
 			button.OnClicked(func(button *ui.Button) {
 				comments <- commentEntry.Text()
 			})
 
-			fmt.Println("Hello")
-			//window.Hide()
-			//commentWindow := ui.NewWindow("Enter comment about the session", 800, 400, false)
-			//commentWindow.SetChild(form)
-			//commentWindow.OnClosing(func(*ui.Window) bool {
-			//	ui.Quit()
-			//	return true
-			//})
-			//commentWindow.Show()
-			//fmt.Println("Hello again")
-			//comment := <-comments
-			//fmt.Println(comment)
-			//commentWindow.Hide()
-			//window.Show()
+			// We display the form
 			ui.QueueMain(func() {
+				window.SetTitle("Enter comment about the session")
 				window.SetChild(form)
 			})
+
+			// Will hold until the button is pressed
 			comment := <- comments
+
+			// Then go back to tracking
 			ui.QueueMain(func() {
+				window.SetTitle(windowTitle)
 				window.SetChild(box)
 			})
 

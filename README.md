@@ -27,8 +27,9 @@ based.
 - [x] Update session on the fly
 - [x] Add comment at end of session
 - [x] Fix GUI exit
-- [ ] Add timer display
-- [ ] Add sound
+- [x] Add timer display
+- [ ] Add return button
+- [ ] Allow deleting project
 
 ## Specifications :
 - Add a project

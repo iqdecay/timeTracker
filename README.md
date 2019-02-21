@@ -7,7 +7,17 @@ I will use [andlabs/ui](https://github.com/andlabs/ui) to have
 a nice GUI that is compatible with all platforms, and not terminal
 based.
 
-The sound is provided thanks to [faiface/beep](https://github.com/faiface/beep).
+
+## Usage :
+
+- First, install dependencies :
+
+  `go get github.com/andlabs/ui`
+- Run the program : 
+ 
+  `go run tracker.go`
+
+
 
 ## Todos :
 - [x] GUI for adding project

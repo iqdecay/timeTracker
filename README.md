@@ -26,9 +26,10 @@ based.
 - [x] GUI when tracking project
 - [x] Update session on the fly
 - [x] Add comment at end of session
-- [x] Fix GUI exit
-- [ ] Add timer display
-- [ ] Add sound
+- [ ] Fix GUI exit when a new project was created
+- [x] Add timer display
+- [ ] Add return button
+- [ ] Allow deleting project
 
 ## Specifications :
 - Add a project
@@ -38,3 +39,4 @@ based.
 - Emit a sound every 30 mins for instance
 - Log the time spent on each project
 - Display a summary of all projects
+

@@ -134,7 +134,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 			panic(err)
 		}
 	case 2:
-		t.history[row].Comment = string(value.(ui.TableString)))
+		t.history[row].Comment = string(value.(ui.TableString))
 	}
 }
 
@@ -231,7 +231,7 @@ func initCreateGUI() {
 			return
 		}
 		project := Project{title, description, time.Now(),
-			duration, history, 0, id, "Project created"}
+			duration, history, id, "Project created"}
 		projects.List[id] = project
 		projects.MaxId = id
 		projects.save()
@@ -286,7 +286,18 @@ func workonProject(id int) {
 	go func() {
 		for {
 			beginTime := <-beginTimes
+			ended := false
+			go func() {
+				// Update the timer display until the button is pressed again
+				for !ended {
+					ui.QueueMain(func() {
+						button.SetText(time.Since(beginTime).Truncate(time.Second).String())
+					})
+					time.Sleep(1 * time.Second)
+				}
+			}()
 			endTime := <-endTimes
+			ended = true
 
 			// Generate a form for commenting the session
 			form := ui.NewForm()
@@ -319,7 +330,7 @@ func workonProject(id int) {
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
 			fmt.Println(comment)
-			session := Session{beginTime, endTime, duration, id, ""}
+			session := Session{beginTime, endTime, duration, id, comment}
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project

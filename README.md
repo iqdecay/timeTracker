@@ -26,9 +26,10 @@ based.
 - [x] GUI when tracking project
 - [x] Update session on the fly
 - [x] Add comment at end of session
-- [ ] Fix GUI exit when a new project was created
+- [x] Fix GUI exit when a new project was created
 - [x] Add timer display
 - [x] Add return button
+- [ ] Add return button when creating a project
 - [ ] Allow deleting project
 
 ## Specifications :

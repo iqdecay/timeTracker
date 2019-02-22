@@ -205,7 +205,12 @@ func initSelectGUI() {
 		window.Destroy()
 		ui.Main(initCreateGUI)
 	})
-	box.Append(createButton, false)
+	// Fit it nicely into a box
+	createBox := ui.NewHorizontalBox()
+	createBox.Append(emptyHorizontalBox(), true)
+	createBox.Append(createButton, true)
+	createBox.Append(emptyHorizontalBox(), true)
+	box.Append(createBox, true)
 }
 
 func initCreateGUI() {

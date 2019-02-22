@@ -273,9 +273,16 @@ func workonProject(id int) {
 		}
 	})
 
+	// Right box
+	rightbox := ui.NewVerticalBox()
+
 	// Add a return button
 	returnButton := ui.NewButton("Return to project list")
-	rightbox := ui.NewVerticalBox()
+	returnButton.OnClicked(func(b *ui.Button) {
+		window.Destroy()
+		ui.Main(initSelectGUI)
+	})
+	rightbox.Append(returnButton, false)
 
 	// Add history tabular display
 

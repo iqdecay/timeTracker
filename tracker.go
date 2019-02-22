@@ -238,6 +238,7 @@ func initCreateGUI() {
 		window.Destroy()
 		fmt.Printf("Working on project : %d \n", id)
 		workonProject(id)
+		return
 	})
 }
 
@@ -272,9 +273,15 @@ func workonProject(id int) {
 		}
 	})
 
+	// Add a return button
+	returnButton := ui.NewButton("Return to project list")
+	rightbox := ui.NewVerticalBox()
+
 	// Add history tabular display
+
 	table, handler, model := generateTable(project)
-	box.Append(table, true)
+	rightbox.Append(table, true)
+	box.Append(rightbox, true)
 
 	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {

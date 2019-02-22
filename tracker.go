@@ -15,7 +15,6 @@ const dateFormat = "Mon 01/02/06 15:04"
 const width = 1200
 const height = 600
 
-
 type Session struct {
 	Begin     time.Time
 	End       time.Time
@@ -333,8 +332,21 @@ func workonProject(id int) {
 		return true
 	})
 	window.Show()
-	// Get session duration and update project with new session
 	go func() {
+
+		// Generate a form for commenting the session
+		form := ui.NewForm()
+		form.Append("\n", ui.NewHorizontalBox(), false)
+		commentEntry := ui.NewEntry()
+		form.Append("Enter comment for the session ", commentEntry, true)
+		submitButton := ui.NewButton("\n\n Save this session \n\n")
+		// The buttons submits the comment
+		submitButton.OnClicked(func(button *ui.Button) {
+			comments <- commentEntry.Text()
+		})
+		form.Append("", submitButton, false)
+
+		// Get session duration and update project with new session
 		for {
 			beginTime := <-beginTimes
 			ended := false
@@ -351,29 +363,20 @@ func workonProject(id int) {
 			endTime := <-endTimes
 			ended = true
 
-			// Generate a form for commenting the session
-			form := ui.NewForm()
-			form.Append("\n", ui.NewHorizontalBox(), false)
-			commentEntry := ui.NewEntry()
-			form.Append("Enter comment for the session ", commentEntry, true)
-			button := ui.NewButton("\n\n Save this session \n\n")
-			form.Append("", button, false)
 
-			// The buttons submits the comment
-			button.OnClicked(func(button *ui.Button) {
-				comments <- commentEntry.Text()
-			})
-
-			// We display the form
+			// Display the form
 			ui.QueueMain(func() {
 				window.SetTitle("Enter comment about the session")
 				window.SetChild(form)
 			})
 
-			// Will hold until the button is pressed
+			// Hold until the button is pressed
 			comment := <-comments
 
-			// Then go back to tracking
+			// Clear the form for later use
+			commentEntry.SetText("")
+
+			// Go back to tracking
 			ui.QueueMain(func() {
 				window.SetTitle(windowTitle)
 				window.SetChild(box)

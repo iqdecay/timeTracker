@@ -11,7 +11,6 @@ import (
 )
 
 const filename = "projects.json"
-const durationFormat = "15:04:05"
 const dateFormat = "Mon 01/02/06 15:04"
 const width = 1200
 const height = 600

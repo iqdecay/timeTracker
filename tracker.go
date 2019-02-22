@@ -13,6 +13,8 @@ import (
 const filename = "projects.json"
 const durationFormat = "15:04:05"
 const dateFormat = "Mon 01/02/06 15:04"
+const width = 1200
+const height = 600
 
 type History []Session
 
@@ -164,7 +166,7 @@ func initSelectGUI() {
 	box.Append(combobox, true)
 
 	// Setup the window
-	window := ui.NewWindow("Select a project or create a new one", 800, 400, false)
+	window := ui.NewWindow("Select a project or create a new one", width, height, false)
 	window.SetChild(box)
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
@@ -209,7 +211,7 @@ func initCreateGUI() {
 	form.Append("", button, false)
 
 	// Setup the window
-	window := ui.NewWindow("Create a project", 800, 400, true)
+	window := ui.NewWindow("Create a project", width, height, true)
 	window.SetChild(form)
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
@@ -254,7 +256,7 @@ func workonProject(id int) {
 
 	box := ui.NewHorizontalBox()
 	windowTitle := fmt.Sprintf("Project : %s", project.Name)
-	window := ui.NewWindow(windowTitle, 800, 400, false)
+	window := ui.NewWindow(windowTitle, width, height, false)
 	window.SetMargined(true)
 	window.SetChild(box)
 

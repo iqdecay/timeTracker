@@ -151,6 +151,11 @@ func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 	return table, handler, tabModel
 }
 
+func emptyHorizontalBox() *ui.Box {
+	// Utility function that creates a blank space for esthetic purposes
+	return ui.NewHorizontalBox()
+}
+
 func initSelectGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
@@ -163,6 +168,7 @@ func initSelectGUI() {
 		ids = append(ids, v.Id)
 	}
 	combobox.SetSelected(0)
+
 	box.Append(combobox, true)
 
 	// Setup the window
@@ -176,8 +182,6 @@ func initSelectGUI() {
 
 	// Add a select button
 	selectButton := ui.NewButton("Work on this project")
-	box.Append(selectButton, true)
-	box.Append(ui.NewHorizontalSeparator(), false)
 	selectButton.OnClicked(func(button *ui.Button) {
 		selectedIndex := combobox.Selected()
 		if selectedIndex == -1 {
@@ -188,6 +192,12 @@ func initSelectGUI() {
 		window.Destroy()
 		workonProject(selectedId)
 	})
+	// Fit it nicely into a box
+	selectBox := ui.NewHorizontalBox()
+	selectBox.Append(emptyHorizontalBox(), true)
+	selectBox.Append(selectButton, true)
+	selectBox.Append(emptyHorizontalBox(), true)
+	box.Append(selectBox, true)
 
 	// Add a create button
 	createButton := ui.NewButton(" \n\n\n Or create a new project \n\n\n")

@@ -41,4 +41,5 @@ based.
 - Emit a sound every 30 mins for instance
 - Log the time spent on each project
 - Display a summary of all projects
+- Delete or modify a project
 

@@ -151,11 +151,6 @@ func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 	return table, handler, tabModel
 }
 
-func emptyHorizontalBox() *ui.Box {
-	// Utility function that creates a blank space for esthetic purposes
-	return ui.NewHorizontalBox()
-}
-
 func initSelectGUI() {
 	// Setup the project selection combobox
 	projects := loadProjects()
@@ -194,9 +189,9 @@ func initSelectGUI() {
 	})
 	// Fit it nicely into a box
 	selectBox := ui.NewHorizontalBox()
-	selectBox.Append(emptyHorizontalBox(), true)
+	selectBox.Append(ui.NewHorizontalBox(), true)
 	selectBox.Append(selectButton, true)
-	selectBox.Append(emptyHorizontalBox(), true)
+	selectBox.Append(ui.NewHorizontalBox(), true)
 	box.Append(selectBox, true)
 
 	// Add a create button
@@ -207,9 +202,9 @@ func initSelectGUI() {
 	})
 	// Fit it nicely into a box
 	createBox := ui.NewHorizontalBox()
-	createBox.Append(emptyHorizontalBox(), true)
+	createBox.Append(ui.NewHorizontalBox(), true)
 	createBox.Append(createButton, true)
-	createBox.Append(emptyHorizontalBox(), true)
+	createBox.Append(ui.NewHorizontalBox(), true)
 	box.Append(createBox, true)
 }
 

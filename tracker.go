@@ -32,7 +32,7 @@ type Project struct {
 	Duration    time.Duration `json:"duration"`
 	History     History       `json:"history-list"`
 	Id          int           `json:"unique-id"`
-	LastComment string        `json:last-comment`
+	LastComment string        `json:"last-comment"`
 }
 
 type ProjectList struct {

@@ -28,7 +28,7 @@ based.
 - [x] Add comment at end of session
 - [ ] Fix GUI exit when a new project was created
 - [x] Add timer display
-- [ ] Add return button
+- [x] Add return button
 - [ ] Allow deleting project
 
 ## Specifications :

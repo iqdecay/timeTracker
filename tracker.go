@@ -42,6 +42,7 @@ type ProjectList struct {
 }
 
 func (p *ProjectList) save() error {
+	// Save the project list to memory using JSON marshaling
 	data, err := json.MarshalIndent(p, "", "	")
 	if err != nil {
 		log.Fatalf("error during json marshaling : %s", err)
@@ -50,6 +51,7 @@ func (p *ProjectList) save() error {
 }
 
 func loadProjects() ProjectList {
+	// Load the project list from memory using JSON unmarshaling
 	var projects ProjectList
 	projects.List = make(map[int]Project)
 	// if the file doesn't exist, the project list is empty
@@ -69,6 +71,7 @@ func loadProjects() ProjectList {
 }
 
 func (p *Project) Add(s Session) {
+	// Add the finished session to the project
 	p.Duration += s.Duration
 	p.History = append(p.History, s)
 	p.LastComment = s.Comment
@@ -80,6 +83,7 @@ type tabHandler struct {
 }
 
 func newTabHandler(h History) *tabHandler {
+	// Create a table to display recent sessions first
 	m := new(tabHandler)
 	// We reverse the slice so recent sessions appear on top
 	var opp int
@@ -93,6 +97,7 @@ func newTabHandler(h History) *tabHandler {
 }
 
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
+	// All data are string-formatted
 	l := 3
 	types := make([]ui.TableValue, l)
 	types[0] = ui.TableString("")
@@ -108,10 +113,13 @@ func (t tabHandler) NumRows(m *ui.TableModel) int {
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
 	case 0:
+		// The date of the session
 		return ui.TableString(t.history[row].Begin.Format(dateFormat))
 	case 1:
+		// Duration of the session
 		return ui.TableString(t.history[row].Duration.String())
 	case 2:
+		// Comment on the session
 		if t.history[row].Comment == "" {
 			return ui.TableString("None")
 		} else {
@@ -126,11 +134,13 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 	var err error
 	switch column {
 	case 0:
+		// Convert string into a begin time
 		t.history[row].Begin, err = time.Parse(dateFormat, string(value.(ui.TableString)))
 		if err != nil {
 			panic(err)
 		}
 	case 1:
+		// Convert string into a duration
 		t.history[row].Duration, err = time.ParseDuration(string(value.(ui.TableString)))
 		if err != nil {
 			panic(err)
@@ -141,6 +151,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 }
 
 func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
+	// Generate the history table with the underlying tabHandler model
 	handler := newTabHandler(project.History)
 	tabModel := ui.NewTableModel(handler)
 	params := ui.TableParams{Model: tabModel, RowBackgroundColorModelColumn: -1}
@@ -152,23 +163,27 @@ func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 }
 
 func initSelectGUI() {
-	// Setup the project selection combobox
-	projects := loadProjects()
+	// GUI where the user either chooses an existing project or creates a new one
+
+	// SELECTION
+	// Add a selection combobox
 	var ids []int
-	box := ui.NewVerticalBox()
-	box.SetPadded(true)
 	combobox := ui.NewCombobox()
+	projects := loadProjects()
 	for _, v := range projects.List {
 		combobox.Append(v.Name)
 		ids = append(ids, v.Id)
 	}
 	combobox.SetSelected(0)
-
+	// Fit it nicely into a box
+	box := ui.NewVerticalBox()
+	box.SetPadded(true)
 	box.Append(combobox, true)
 
 	// Setup the window
 	window := ui.NewWindow("Select a project or create a new one", width, height, false)
 	window.SetChild(box)
+	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
@@ -178,6 +193,7 @@ func initSelectGUI() {
 	// Add a select button
 	selectButton := ui.NewButton("Work on this project")
 	selectButton.OnClicked(func(button *ui.Button) {
+		// Get the selected id from combobox
 		selectedIndex := combobox.Selected()
 		if selectedIndex == -1 {
 			ui.MsgBox(window, "Error", "Please choose a project or create a new one")
@@ -185,6 +201,7 @@ func initSelectGUI() {
 		}
 		selectedId := ids[selectedIndex]
 		window.Destroy()
+		// Display the GUI for working on a project
 		workonProject(selectedId)
 	})
 	// Fit it nicely into a box
@@ -209,6 +226,8 @@ func initSelectGUI() {
 }
 
 func initCreateGUI() {
+	// GUI to create a new project
+
 	// Setup the creation form
 	form := ui.NewForm()
 	form.Append("\n", ui.NewHorizontalBox(), false)
@@ -223,6 +242,7 @@ func initCreateGUI() {
 	// Setup the window
 	window := ui.NewWindow("Create a project", width, height, true)
 	window.SetChild(form)
+	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
@@ -233,6 +253,7 @@ func initCreateGUI() {
 	projects := loadProjects()
 	id := projects.MaxId + 1
 	button.OnClicked(func(b *ui.Button) {
+		// Get data and register it as new project
 		var history History
 		var duration time.Duration
 		title := titleEntry.Text()
@@ -255,6 +276,8 @@ func initCreateGUI() {
 }
 
 func workonProject(id int) {
+	// GUI when working on a project
+
 	// Send and receive times for tracking
 	beginTimes := make(chan time.Time)
 	endTimes := make(chan time.Time)
@@ -262,6 +285,7 @@ func workonProject(id int) {
 
 	projects := loadProjects()
 	project := projects.List[id]
+
 	// Initialize window
 
 	box := ui.NewHorizontalBox()
@@ -315,8 +339,9 @@ func workonProject(id int) {
 			beginTime := <-beginTimes
 			ended := false
 			go func() {
-				// Update the timer display until the button is pressed again
+				// Update the timer display every second until the button is pressed again
 				for !ended {
+					// Queue the event because we are in a goroutine
 					ui.QueueMain(func() {
 						button.SetText(time.Since(beginTime).Truncate(time.Second).String())
 					})

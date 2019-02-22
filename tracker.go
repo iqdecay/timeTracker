@@ -279,6 +279,7 @@ func workonProject(id int) {
 	// Add a return button
 	returnButton := ui.NewButton("Return to project list")
 	returnButton.OnClicked(func(b *ui.Button) {
+
 		window.Destroy()
 		ui.Main(initSelectGUI)
 	})
@@ -363,5 +364,8 @@ func workonProject(id int) {
 }
 
 func main() {
+	ui.OnShouldQuit(func() bool {
+		return true
+	})
 	ui.Main(initSelectGUI)
 }

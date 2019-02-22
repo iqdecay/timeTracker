@@ -12,7 +12,7 @@ import (
 
 const filename = "projects.json"
 const durationFormat = "15:04:05"
-const dateFormat = "Mon 01/02/06 03:04"
+const dateFormat = "Mon 01/02/06 15:04"
 
 type History []Session
 

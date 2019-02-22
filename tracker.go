@@ -15,7 +15,6 @@ const dateFormat = "Mon 01/02/06 15:04"
 const width = 1200
 const height = 600
 
-type History []Session
 
 type Session struct {
 	Begin     time.Time
@@ -24,6 +23,8 @@ type Session struct {
 	ProjectId int
 	Comment   string
 }
+
+type History []Session
 
 type Project struct {
 	Name        string        `json:"name"`

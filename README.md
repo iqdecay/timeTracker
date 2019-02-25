@@ -33,7 +33,8 @@ based.
 - [ ] Track the project directory for commits
 - [ ] Add keyboard support 
 - [ ] Add return button when creating a project
-- [ ] Allow deleting project
+- [ ] Allow deleting project
+
 
 ## Specifications :
 - Add a project

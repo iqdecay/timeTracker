@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/andlabs/ui"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -21,6 +25,35 @@ type Session struct {
 	Duration  time.Duration
 	ProjectId int
 	Comment   string
+	Commits   int
+}
+
+func (s *Session) getCommits() {
+	// Get the number of commits made between Begin and End time
+	beginDate := s.Begin.Format(dateFormat)
+	endDate := s.End.Format(dateFormat)
+	c1 := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'%h %an %ad'")
+	c2 := exec.Command("wc", "-l")
+	r, w := io.Pipe()
+	c1.Stdout = w
+	c2.Stdin = r
+
+	var b2 bytes.Buffer
+	c2.Stdout = &b2
+
+	c1.Start()
+	c2.Start()
+	c1.Wait()
+	w.Close()
+	c2.Wait()
+	// The last byte is a newline
+	output := b2.String()
+	commit, err := strconv.Atoi(output[:len(output)-1])
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%d commits made during this session \n", commit)
+	s.Commits = commit
 }
 
 type History []Session

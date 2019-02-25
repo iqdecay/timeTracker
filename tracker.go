@@ -107,6 +107,7 @@ func (p *Project) Add(s Session) {
 	// Add the finished session to the project
 	p.Duration += s.Duration
 	p.History = append(p.History, s)
+	p.Commits += s.Commits
 	p.LastComment = s.Comment
 }
 
@@ -396,7 +397,6 @@ func workonProject(id int) {
 			}()
 			endTime := <-endTimes
 			ended = true
-
 
 			// Display the form
 			ui.QueueMain(func() {

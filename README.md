@@ -29,6 +29,7 @@ based.
 - [x] Fix GUI exit when a new project was created
 - [x] Add timer display
 - [x] Add return button
+- [x] Add commits tracking
 - [ ] Add keyboard support 
 - [ ] Add return button when creating a project
 - [ ] Allow deleting project

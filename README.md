@@ -29,7 +29,8 @@ based.
 - [x] Fix GUI exit when a new project was created
 - [x] Add timer display
 - [x] Add return button
-- [x] Add commits tracking
+- [ ] Add a project directory at creation
+- [ ] Track the project directory for commits
 - [ ] Add keyboard support 
 - [ ] Add return button when creating a project
 - [ ] Allow deleting project
@@ -43,4 +44,5 @@ based.
 - Log the time spent on each project
 - Display a summary of all projects
 - Delete or modify a project
+- Track the commits on the project
 

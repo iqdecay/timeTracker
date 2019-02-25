@@ -33,6 +33,7 @@ type Project struct {
 	History     History       `json:"history-list"`
 	Id          int           `json:"unique-id"`
 	LastComment string        `json:"last-comment"`
+	Commits     int           `json:"commits"`
 }
 
 type ProjectList struct {
@@ -263,7 +264,7 @@ func initCreateGUI() {
 			return
 		}
 		project := Project{title, description, time.Now(),
-			duration, history, id, "Project created"}
+			duration, history, id, "Project created", 0}
 		projects.List[id] = project
 		projects.MaxId = id
 		projects.save()
@@ -385,7 +386,8 @@ func workonProject(id int) {
 			// Add the new session to project
 			duration := endTime.Sub(beginTime)
 			fmt.Println(comment)
-			session := Session{beginTime, endTime, duration, id, comment}
+			session := Session{beginTime, endTime, duration, id, comment, 0}
+			session.getCommits()
 			project.Add(session)
 			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
 			projects.List[id] = project

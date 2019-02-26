@@ -257,11 +257,23 @@ func initSelectGUI() {
 
 func initCreateGUI() {
 	// GUI to create a new project
+	window := ui.NewWindow("Create a project", width, height, true)
 
 	// Setup the creation form
 	form := ui.NewForm()
-	form.Append("\n", ui.NewHorizontalBox(), false)
 	form.SetPadded(true)
+	// Add a return button
+	returnButton := ui.NewButton("Return to project list")
+	returnButton.OnClicked(func(b *ui.Button) {
+		window.Destroy()
+		ui.Main(initSelectGUI)
+	})
+	// Fit it nicely into a box
+	topBox := ui.NewHorizontalBox()
+	topBox.Append(returnButton, false)
+	topBox.Append(ui.NewHorizontalBox(), true)
+	form.Append("", topBox, false)
+	// Create the input in the form
 	titleEntry := ui.NewEntry()
 	form.Append("Enter project name", titleEntry, false)
 	descriptionEntry := ui.NewMultilineEntry()
@@ -272,7 +284,6 @@ func initCreateGUI() {
 	form.Append("", button, false)
 
 	// Setup the window
-	window := ui.NewWindow("Create a project", width, height, true)
 	window.SetChild(form)
 	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {

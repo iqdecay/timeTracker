@@ -31,7 +31,6 @@ based.
 - [x] Add return button
 - [x] Add a project directory at creation
 - [x] Track the project directory for commits
-- [ ] Add keyboard support 
 - [ ] Add return button when creating a project
 - [ ] Allow deleting project
 

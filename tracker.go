@@ -16,6 +16,7 @@ import (
 
 const filename = "projects.json"
 const dateFormat = "Mon 01/02/06 15:04"
+const gitDateFormat = "01/02/06 15:04:05"
 const width = 1200
 const height = 600
 
@@ -34,10 +35,10 @@ func (s *Session) getCommits() {
 	// Get the number of commits made between Begin and End time
 
 	id := s.ProjectId
-	beginDate := s.Begin.Format(dateFormat)
-	endDate := s.End.Format(dateFormat)
+	beginDate := s.Begin.Format(gitDateFormat)
+	endDate := s.End.Format(gitDateFormat)
 
-	gitCommand := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'%h %an %ad'")
+	gitCommand := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'oneline'")
 	gitCommand.Dir = projects.List[id].Dir // Run the command in the project directory
 	countLineCommand := exec.Command("wc", "-l")
 	r, w := io.Pipe()

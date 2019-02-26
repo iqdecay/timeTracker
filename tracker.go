@@ -14,8 +14,8 @@ import (
 const filename = "projects.json"
 const dateFormat = "Mon 01/02/06 15:04"
 const gitDateFormat = "01/02/06 15:04:05"
-const width = 1200
-const height = 600
+const width = 600
+const height = 300
 
 var projects = loadProjects()
 
@@ -317,6 +317,15 @@ func initCreateGUI() {
 			ui.MsgBox(window, "Error", "The provided path is incorrect")
 			return
 		}
+		gitStatus := exec.Command("git", "status")
+		gitStatus.Dir = dir
+		_, err := gitStatus.Output()
+		if err != nil {
+			ui.MsgBox(window, "Error", "The specified directory is not a Git directory."+
+				"\nPlease run 'git init .' ")
+			return
+		}
+
 		project := Project{title, description, time.Now(),
 			duration, history, id, "Project created", 0, dir}
 		projects.List[id] = project

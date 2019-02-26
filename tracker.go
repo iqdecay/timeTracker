@@ -19,6 +19,8 @@ const dateFormat = "Mon 01/02/06 15:04"
 const width = 1200
 const height = 600
 
+var projects = loadProjects()
+
 type Session struct {
 	Begin     time.Time
 	End       time.Time
@@ -203,7 +205,6 @@ func initSelectGUI() {
 	// Add a selection combobox
 	var ids []int
 	combobox := ui.NewCombobox()
-	projects := loadProjects()
 	for _, v := range projects.List {
 		combobox.Append(v.Name)
 		ids = append(ids, v.Id)
@@ -284,7 +285,6 @@ func initCreateGUI() {
 	window.Show()
 
 	// Setup the creation via the confirmation button
-	projects := loadProjects()
 	id := projects.MaxId + 1
 	button.OnClicked(func(b *ui.Button) {
 		// Get data and register it as new project
@@ -317,7 +317,6 @@ func workonProject(id int) {
 	endTimes := make(chan time.Time)
 	comments := make(chan string)
 
-	projects := loadProjects()
 	project := projects.List[id]
 
 	// Initialize window

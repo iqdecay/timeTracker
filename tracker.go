@@ -128,12 +128,13 @@ func newTabHandler(h History) *tabHandler {
 }
 
 func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
-	// All data are string-formatted
-	l := 3
+	// Return the type of the data in each column
+	l := 4
 	types := make([]ui.TableValue, l)
 	types[0] = ui.TableString("")
 	types[1] = ui.TableString("")
-	types[2] = ui.TableString("")
+	types[2] = ui.TableInt(0)
+	types[3] = ui.TableString("")
 	return types
 }
 
@@ -142,6 +143,7 @@ func (t tabHandler) NumRows(m *ui.TableModel) int {
 }
 
 func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
+	// Return value of cell in [row][column]
 	switch column {
 	case 0:
 		// The date of the session
@@ -150,12 +152,14 @@ func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 		// Duration of the session
 		return ui.TableString(t.history[row].Duration.String())
 	case 2:
+		// Number of commits in the session
+		return ui.TableInt(t.history[row].Commits)
+	case 3:
 		// Comment on the session
 		if t.history[row].Comment == "" {
 			return ui.TableString("None")
 		} else {
 			return ui.TableString(t.history[row].Comment)
-
 		}
 	}
 	return ui.TableString("error")
@@ -177,6 +181,8 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 			panic(err)
 		}
 	case 2:
+		t.history[row].Commits = int(value.(ui.TableInt))
+	case 3:
 		t.history[row].Comment = string(value.(ui.TableString))
 	}
 }
@@ -189,7 +195,8 @@ func generateTable(project Project) (*ui.Table, *tabHandler, *ui.TableModel) {
 	table := ui.NewTable(&params)
 	table.AppendTextColumn("Date", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Duration", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendTextColumn("Comment", 2, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Commits", 2, ui.TableModelColumnNeverEditable, nil)
+	table.AppendTextColumn("Comment", 3, ui.TableModelColumnNeverEditable, nil)
 	return table, handler, tabModel
 }
 

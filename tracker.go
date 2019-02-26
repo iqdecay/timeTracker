@@ -355,9 +355,6 @@ func workonProject(id int) {
 		}
 	})
 
-	// Right box
-	rightbox := ui.NewVerticalBox()
-
 	// Add a return button
 	returnButton := ui.NewButton("Return to project list")
 	returnButton.OnClicked(func(b *ui.Button) {
@@ -365,6 +362,8 @@ func workonProject(id int) {
 		window.Destroy()
 		ui.Main(initSelectGUI)
 	})
+	// Right part of the ui
+	rightbox := ui.NewVerticalBox()
 	rightbox.Append(returnButton, false)
 
 	// Add history tabular display
@@ -372,6 +371,16 @@ func workonProject(id int) {
 	table, handler, model := generateTable(project)
 	rightbox.Append(table, true)
 	box.Append(rightbox, true)
+
+	// Add a delete button
+	deleteButton := ui.NewButton("Delete this project")
+	deleteButton.OnClicked(func(b *ui.Button) {
+		delete(projects.List, id)
+		ui.MsgBox(window, "Confirmation", "Project was correctly deleted")
+		window.Destroy()
+		ui.Main(initSelectGUI)
+	})
+	rightbox.Append(deleteButton, false)
 
 	// Quit the app when the window is closed
 	window.OnClosing(func(*ui.Window) bool {

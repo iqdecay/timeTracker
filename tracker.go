@@ -32,22 +32,24 @@ type Session struct {
 
 func (s *Session) getCommits() {
 	// Get the number of commits made between Begin and End time
+
+	id := s.ProjectId
 	beginDate := s.Begin.Format(dateFormat)
 	endDate := s.End.Format(dateFormat)
-	c1 := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'%h %an %ad'")
-	c2 := exec.Command("wc", "-l")
+
+	gitCommand := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'%h %an %ad'")
+	gitCommand.Dir = projects.List[id].Dir // Run the command in the project directory
+	countLineCommand := exec.Command("wc", "-l")
 	r, w := io.Pipe()
-	c1.Stdout = w
-	c2.Stdin = r
-
+	gitCommand.Stdout = w
+	countLineCommand.Stdin = r
 	var b2 bytes.Buffer
-	c2.Stdout = &b2
-
-	c1.Start()
-	c2.Start()
-	c1.Wait()
+	countLineCommand.Stdout = &b2
+	gitCommand.Start()
+	countLineCommand.Start()
+	gitCommand.Wait()
 	w.Close()
-	c2.Wait()
+	countLineCommand.Wait()
 	// The last byte is a newline
 	output := b2.String()
 	commit, err := strconv.Atoi(output[:len(output)-1])
@@ -69,6 +71,7 @@ type Project struct {
 	Id          int           `json:"unique-id"`
 	LastComment string        `json:"last-comment"`
 	Commits     int           `json:"commits"`
+	Dir         string        `json:"working-directory"`
 }
 
 type ProjectList struct {

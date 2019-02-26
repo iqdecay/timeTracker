@@ -16,16 +16,20 @@ based.
 - Run the program : 
  
   `go run tracker.go`
+  
+  
+ Or you can just use the provided binary by running :
+ 
+ `./tracker`
 
 
 ## Specifications :
 - Add a project
 - Select a project among a list of added projects
-- Start/stop tracking the time on the click of a button
+- Start/stop tracking the time spent on a project
+- Track the commits made during a session
 - Display a stopwatch
-- Emit a sound every 30 mins for instance
 - Log the time spent on each project
-- Display a summary of all projects
-- Delete or modify a project
+- Delete a project
 - Track the commits on the project
 

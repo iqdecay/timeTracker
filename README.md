@@ -18,23 +18,6 @@ based.
   `go run tracker.go`
 
 
-
-## Todos :
-- [x] GUI for adding project
-- [x] GUI for selecting project
-- [x] Generate tracking project table
-- [x] GUI when tracking project
-- [x] Update session on the fly
-- [x] Add comment at end of session
-- [x] Fix GUI exit when a new project was created
-- [x] Add timer display
-- [x] Add return button
-- [x] Add a project directory at creation
-- [x] Track the project directory for commits
-- [ ] Add return button when creating a project
-- [ ] Allow deleting project
-
-
 ## Specifications :
 - Add a project
 - Select a project among a list of added projects

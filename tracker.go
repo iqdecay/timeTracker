@@ -273,7 +273,9 @@ func initCreateGUI() {
 	titleEntry := ui.NewEntry()
 	form.Append("Enter project name", titleEntry, false)
 	descriptionEntry := ui.NewMultilineEntry()
-	form.Append("Enter the description of the project", descriptionEntry, true)
+	form.Append("Enter the description of the project", descriptionEntry, false)
+	dirEntry := ui.NewEntry()
+	form.Append("Enter the project directory, in absolute path ", dirEntry, false)
 	button := ui.NewButton("\n\n\n\n Save this project \n\n\n\n")
 	form.Append("", button, false)
 
@@ -295,13 +297,18 @@ func initCreateGUI() {
 		var duration time.Duration
 		title := titleEntry.Text()
 		description := descriptionEntry.Text()
+		dir := dirEntry.Text()
 		// Title must not be empty
 		if title == "" {
 			ui.MsgBox(window, "Error", "Please provide a non-empty title !")
 			return
 		}
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			ui.MsgBox(window, "Error", "The provided path is incorrect")
+			return
+		}
 		project := Project{title, description, time.Now(),
-			duration, history, id, "Project created", 0}
+			duration, history, id, "Project created", 0, dir}
 		projects.List[id] = project
 		projects.MaxId = id
 		projects.save()

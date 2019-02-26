@@ -1,16 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/andlabs/ui"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"strconv"
 	"time"
 )
 
@@ -38,27 +35,21 @@ func (s *Session) getCommits() {
 	beginDate := s.Begin.Format(gitDateFormat)
 	endDate := s.End.Format(gitDateFormat)
 
-	gitCommand := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=format:'oneline'")
+	gitCommand := exec.Command("git", "log", "--since", beginDate, "--until", endDate, "--pretty=oneline")
 	gitCommand.Dir = projects.List[id].Dir // Run the command in the project directory
-	countLineCommand := exec.Command("wc", "-l")
-	r, w := io.Pipe()
-	gitCommand.Stdout = w
-	countLineCommand.Stdin = r
-	var b2 bytes.Buffer
-	countLineCommand.Stdout = &b2
-	gitCommand.Start()
-	countLineCommand.Start()
-	gitCommand.Wait()
-	w.Close()
-	countLineCommand.Wait()
-	// The last byte is a newline
-	output := b2.String()
-	commit, err := strconv.Atoi(output[:len(output)-1])
+	output, err := gitCommand.Output()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("%d commits made during this session \n", commit)
-	s.Commits = commit
+	var commits int
+	// Each line of commit ends with a newline
+	for _, b := range output {
+		if b == byte('\n') {
+			commits ++
+		}
+	}
+	fmt.Printf("%d commits made during this session \n", commits)
+	s.Commits = commits
 }
 
 type History []Session

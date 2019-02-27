@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 )
 
@@ -133,7 +134,7 @@ func (t tabHandler) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	types := make([]ui.TableValue, l)
 	types[0] = ui.TableString("")
 	types[1] = ui.TableString("")
-	types[2] = ui.TableInt(0)
+	types[2] = ui.TableString("")
 	types[3] = ui.TableString("")
 	return types
 }
@@ -153,7 +154,7 @@ func (t tabHandler) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 		return ui.TableString(t.history[row].Duration.String())
 	case 2:
 		// Number of commits in the session
-		return ui.TableInt(t.history[row].Commits)
+		return ui.TableString(strconv.Itoa(t.history[row].Commits))
 	case 3:
 		// Comment on the session
 		if t.history[row].Comment == "" {
@@ -181,7 +182,7 @@ func (t *tabHandler) SetCellValue(m *ui.TableModel, row, column int, value ui.Ta
 			panic(err)
 		}
 	case 2:
-		t.history[row].Commits = int(value.(ui.TableInt))
+		t.history[row].Commits, _ = strconv.Atoi(string(value.(ui.TableString)))
 	case 3:
 		t.history[row].Comment = string(value.(ui.TableString))
 	}

@@ -318,12 +318,12 @@ func initCreateGUI() {
 			ui.MsgBox(window, "Error", "The provided path is incorrect")
 			return
 		}
-		gitStatus := exec.Command("git", "status")
-		gitStatus.Dir = dir
-		_, err := gitStatus.Output()
+		gitLog := exec.Command("git", "log")
+		gitLog.Dir = dir
+		_, err := gitLog.Output()
 		if err != nil {
-			ui.MsgBox(window, "Error", "The specified directory is not a Git directory."+
-				"\nPlease run 'git init .' ")
+			ui.MsgBox(window, "Error", "The specified directory is not a Git directory, or has no commits"+
+				"\nPlease run 'git init .' and add a first commit")
 			return
 		}
 

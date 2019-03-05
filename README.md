@@ -28,7 +28,9 @@ based.
 - [ ] Add the possibility for a todolist
 - [ ] Don't save sessions < 1 min
 - [ ] Display project summary
+- [ ] Fix sessions ordering in display
 - [ ] Change window size
+- [ ] Add sound at regular intervals
 
 
 ## Specifications :

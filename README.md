@@ -21,11 +21,12 @@ based.
  Or you can just use the provided binary by running :
  
  `./tracker`
+ 
  ## TODOS :
 - [ ] Add confirmation for deletion
-- [ ] Format time down to the minute
+- [x] Format time down to the minute
 - [ ] Add the possibility for a todolist
-- [ ] Don't save sessions < 1 min
+- [x] Don't save sessions < 1 min
 - [ ] Display project summary
 - [ ] Fix sessions ordering in display
 - [ ] Change window size

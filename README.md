@@ -21,8 +21,7 @@ based.
  Or you can just use the provided binary by running :
  
  `./tracker`
- 
-## TODOS :
+ ## TODOS :
 - [ ] Add confirmation for deletion
 - [ ] Format time down to the minute
 - [ ] Add the possibility for a todolist

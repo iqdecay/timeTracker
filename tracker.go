@@ -40,7 +40,7 @@ func (s *Session) getCommits() {
 	gitCommand.Dir = projects.List[id].Dir // Run the command in the project directory
 	output, err := gitCommand.Output()
 	if err != nil {
-		panic(err)
+		log.Fatalf("error during git tracking : %s ", err)
 	}
 	var commits int
 	// Each line of commit ends with a newline
@@ -118,13 +118,12 @@ func newTabHandler(h History) *tabHandler {
 	// Create a table to display recent sessions first
 	m := new(tabHandler)
 	// We reverse the slice so recent sessions appear on top
-	var opp int
-	for i := len(h)/2 - 1; i >= 0; i-- {
-		opp = len(h) - 1 - i
-		h[i], h[opp] = h[opp], h[i]
+	var hist History
+	for i := len(h) - 1; i >= 0; i-- {
+		hist = append(hist, h[i])
 	}
-	m.history = h
-	m.rows = len(h)
+	m.history = hist
+	m.rows = len(hist)
 	return m
 }
 
@@ -413,7 +412,7 @@ func workonProject(id int) {
 		commentEntry := ui.NewEntry()
 		form.Append("Enter comment for the session ", commentEntry, true)
 		submitButton := ui.NewButton("\n\n Save this session \n\n")
-		// The buttons submits the comment
+		// The button submits the comment
 		submitButton.OnClicked(func(button *ui.Button) {
 			comments <- commentEntry.Text()
 		})
@@ -435,43 +434,44 @@ func workonProject(id int) {
 			}()
 			endTime := <-endTimes
 			ended = true
+			duration := endTime.Sub(beginTime).Round(1 * time.Minute)
+			// Register sessions longer than 2 minutes
+			if duration.Minutes() >= 2 {
 
-			// Display the form
-			ui.QueueMain(func() {
-				window.SetTitle("Enter comment about the session")
-				window.SetChild(form)
-			})
+				// Display the form
+				ui.QueueMain(func() {
+					window.SetTitle("Enter comment about the session")
+					window.SetChild(form)
+				})
 
-			// Hold until the button is pressed
-			comment := <-comments
+				// Hold until the button is pressed
+				comment := <-comments
 
-			// Clear the form for later use
-			commentEntry.SetText("")
+				// Clear the form for later use
+				commentEntry.SetText("")
 
-			// Go back to tracking
-			ui.QueueMain(func() {
-				window.SetTitle(windowTitle)
-				window.SetChild(box)
-			})
+				// Go back to tracking
+				ui.QueueMain(func() {
+					window.SetTitle(windowTitle)
+					window.SetChild(box)
+				})
 
-			// Add the new session to project
-			duration := endTime.Sub(beginTime)
-			fmt.Println(comment)
-			session := Session{beginTime, endTime, duration, id, comment, 0}
-			session.getCommits()
-			project.Add(session)
-			fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
-			projects.List[id] = project
-			projects.save()
+				session := Session{beginTime, endTime, duration, id, comment, 0}
+				session.getCommits()
+				project.Add(session)
+				fmt.Printf("Project n° %d was updated with a session of %s \n", id, duration)
+				projects.List[id] = project
+				projects.save()
 
-			// Update the history display with the new session
-			handler.rows += 1
-			previousHistory := handler.history
-			previousHistory = append(previousHistory, Session{})
-			copy(previousHistory[1:], previousHistory[0:])
-			previousHistory[0] = session
-			handler.history = previousHistory
-			model.RowInserted(0)
+				// Update the history display with the new session
+				handler.rows += 1
+				previousHistory := handler.history
+				previousHistory = append(previousHistory, Session{})
+				copy(previousHistory[1:], previousHistory[0:])
+				previousHistory[0] = session
+				handler.history = previousHistory
+				model.RowInserted(0)
+			}
 		}
 	}()
 }

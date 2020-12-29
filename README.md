@@ -10,9 +10,6 @@ based.
 
 ## Usage :
 
-- First, install dependencies :
-
-  `go get github.com/andlabs/ui`
 - Run the program : 
  
   `go run tracker.go`
